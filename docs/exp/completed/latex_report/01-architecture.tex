@@ -1,0 +1,57 @@
+% NLA Architecture: Core Dual-Model System
+% Input this in the main beamer file: \input{latex/01-architecture}
+
+\begin{frame}{NLA 架构总览}
+\small
+\begin{block}{核心思想}
+\textbf{Natural Language Autoencoder (NLA)} 用自然语言解释 Transformer 残差流中的激活向量，
+并通过重建保真度来验证解释的质量。
+\end{block}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.52\linewidth}
+\begin{tikzpicture}[
+  node distance=1.6cm,
+  box/.style={draw, rounded corners=2pt, align=center, minimum width=2.8cm, minimum height=0.9cm, font=\small},
+  arr/.style={->, thick, color=nlablue}
+]
+\node[box] (act) {残差流向量\\\textbf{3584-d}\\Layer 20};
+\node[box, below left=1.0cm and 1.0cm of act] (av) {\textbf{AV / Actor}\\activation $\rightarrow$ text};
+\node[box, below right=1.0cm and 1.0cm of act] (ar) {\textbf{AR / Critic}\\text $\rightarrow$ activation};
+\node[box, below=3.0cm of act] (txt) {自然语言 explanation};
+\draw[->, thick, color=nlablue] (act) -- node[midway, left, font=\scriptsize] {注入} (av);
+\draw[->, thick, color=nlablue] (av) -- node[midway, left, font=\scriptsize] {decode} (txt);
+\draw[->, thick, color=nlablue] (txt) -- node[midway, right, font=\scriptsize] {encode} (ar);
+\draw[->, thick, color=nlablue] (ar) -- node[midway, right, font=\scriptsize] {重建} (act);
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.45\linewidth}
+\begin{itemize}
+  \item \textbf{实验范围}：Qwen2.5-7B-Instruct（共 28 层）， layer 20。
+  \item 中后期层：已完成大部分语义加工，但尚未坍缩到输出 token。
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{编解码器总览}
+\small
+\begin{tabularx}{\linewidth}{lXX}
+\toprule
+维度 & AV (Actor) & AR (Critic) \\
+\midrule
+方向 & activation $\rightarrow$ text & text $\rightarrow$ activation \\
+\midrule
+基础模型 & Qwen2.5-7B-\textbf{Instruct} & Qwen2.5-7B（\textbf{base}）\\
+层数 & \textbf{全部 28 层}保留 & \textbf{截断到 $0,...,K$ 层}\\
+新增模块 & -- & \textbf{Value Head}：Linear(3584, 3584, bias=False) \\
+Hook 机制 & Embedding 层 forward hook：替换 ※ 位置的 embedding 为 activation & -- \\
+注入/提取 & Activation 向量注入到 embedding 层 & 从文本编码 activation，取\textbf{最后一个 token}\\
+训练目标 & SFT (CE loss) + RL (GRPO, AR reward) & SFT only：方向 MSE \\
+\midrule
+输入 & 残差流向量（注入 token \code{※} 接收） & 自然语言 explanation \\
+输出 & Token logits / 自然语言字符串 & 3584-d 重建向量 \\
+\bottomrule
+\end{tabularx}
+
+\end{frame}

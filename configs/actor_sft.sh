@@ -8,7 +8,26 @@ INSTRUCT_MODEL="${INSTRUCT_MODEL:-${BASE_MODEL:-}}"
 : "${SAVE_DIR:?set SAVE_DIR for output}"
 : "${INJ_SCALE:?set INJ_SCALE — injection hyperparameter (e.g. 1.0, 30.0, raw, sqrt_d_model)}"
 
-${PYTHON:-python} train.py \
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NLA_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+TRAIN_PY="${TRAIN_PY:-train.py}"
+if [[ "$TRAIN_PY" != /* && ! -f "$TRAIN_PY" ]]; then
+    if [[ -n "${MILES_REPO:-}" && -f "$MILES_REPO/train.py" ]]; then
+        TRAIN_PY="$MILES_REPO/train.py"
+    elif [[ -f "$NLA_REPO/../miles/train.py" ]]; then
+        TRAIN_PY="$NLA_REPO/../miles/train.py"
+    fi
+fi
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help)
+            exec ${PYTHON:-python} -c 'from miles.utils.arguments import parse_args; parse_args()' --help
+            ;;
+    esac
+done
+
+${PYTHON:-python} "$TRAIN_PY" \
     --train-backend "${TRAIN_BACKEND:-fsdp}" \
     --custom-actor-cls-path "${ACTOR_CLS:-nla.train_actor.NLAFSDPActor}" \
     --loss-type sft_loss \

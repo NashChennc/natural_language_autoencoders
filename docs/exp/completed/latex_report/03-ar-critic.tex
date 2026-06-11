@@ -1,0 +1,60 @@
+% NLA Architecture: AR / Critic — Text → Activation
+% \input{latex/03-ar-critic}
+
+% ============================================================
+% Section 1: Architecture
+% ============================================================
+
+\begin{frame}{AR / Architecture — Core Design}
+\small
+
+\textbf{Activation Reconstructor (AR)} 将自然语言 explanation 映射回 activation 向量。如果 explanation 真正捕获了 activation 中的信息，AR 应能重建出方向相似的向量——这个重建保真度就是 explanation 质量的自动度量。AR 和 AV 共同构成 autoencoder。
+
+\begin{block}{架构（基于 Qwen2.5-7B base）}
+\begin{enumerate}
+  \item \textbf{截断层数}：只保留 $0,...,K$ 层（提取层和 AR 截断处严格对齐）。
+  \item \textbf{移除 Final LayerNorm} → \code{nn.Identity()}。
+  \item \textbf{移除 LM Head，添加线性层 Value Head}
+  \item loss 是方向归一化 MSE（Directional MSE）
+\end{enumerate}
+\end{block}
+
+\vspace{0.4em}
+\begin{itemize}
+  \item AR 可以\textbf{部分区分 explanation 中 true/false claim}：如果删除 claim 对 MSE 的伤害更大，则更说明该 claim 关键。
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{AR / Architecture — Forward Pass}
+\small
+
+\begin{enumerate}
+  \item Explanation 文本填入 critic prompt 模板 → tokenize → \code{input\_ids: [B, S]}。
+  \item 前向通过 $0,...,K$ 层 backbone transformer → \code{backbone\_last\_hidden: [B, S, 3584]}（pre-LN 原始残差流）。
+  \item Value head 线性投影 → \code{values: [B, S, 3584]}。
+  \item \textbf{训练 \& 推理均取最后一个 token}：\code{pred = values[:, -1, :] → [B, 3584]}。
+\end{enumerate}
+
+\vspace{0.4em}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=1.0cm,
+  box/.style={draw, rounded corners=2pt, align=center, minimum width=1.6cm, minimum height=0.65cm, font=\footnotesize},
+  arr/.style={->, thick, color=nlared}
+]
+\node[box, fill=red!8] (txt) {Explanation\\文本};
+\node[box, fill=red!8, right=0.5cm of txt] (tok) {Tokenizer\\{\footnotesize \code{[B,S]}}};
+\node[box, fill=orange!8, right=0.5cm of tok] (tr) {$0,...,K$ 层\\Transformer};
+\node[box, fill=orange!8, right=0.5cm of tr] (vh) {Value Head\\{\footnotesize Linear 3584→3584}};
+\node[box, fill=red!8, right=0.5cm of vh] (val) {Values\\{\footnotesize \code{[B,S,3584]}}};
+\node[box, fill=red!8, below=0.7cm of val] (last) {取最后 token\\{\footnotesize \code{[B,3584]}}};
+
+\draw[arr] (txt) -- (tok);
+\draw[arr] (tok) -- (tr);
+\draw[arr] (tr) -- (vh);
+\draw[arr] (vh) -- (val);
+\draw[arr] (val) -- (last);
+\end{tikzpicture}
+\end{center}
+\end{frame}

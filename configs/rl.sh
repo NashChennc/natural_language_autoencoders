@@ -52,7 +52,26 @@ ROLLOUT_GPUS=${ROLLOUT_GPUS:-4}
 # Safe for the critic: _swap_rollout_to_critic_tokens sets total_lengths to
 # critic token lengths, which is what get_data_iterator reads for packing.
 
-${PYTHON:-python} train.py \
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+NLA_REPO="$(cd "$SCRIPT_DIR/.." && pwd)"
+TRAIN_PY="${TRAIN_PY:-train.py}"
+if [[ "$TRAIN_PY" != /* && ! -f "$TRAIN_PY" ]]; then
+    if [[ -n "${MILES_REPO:-}" && -f "$MILES_REPO/train.py" ]]; then
+        TRAIN_PY="$MILES_REPO/train.py"
+    elif [[ -f "$NLA_REPO/../miles/train.py" ]]; then
+        TRAIN_PY="$NLA_REPO/../miles/train.py"
+    fi
+fi
+for arg in "$@"; do
+    case "$arg" in
+        -h|--help)
+            exec ${PYTHON:-python} -c 'from miles.utils.arguments import parse_args; parse_args()' --help
+            ;;
+    esac
+done
+
+${PYTHON:-python} "$TRAIN_PY" \
     --train-backend "${TRAIN_BACKEND:-fsdp}" \
     --custom-actor-cls-path "${ACTOR_CLS:-nla.train_actor.NLAFSDPActor}" \
     --loss-type policy_loss \

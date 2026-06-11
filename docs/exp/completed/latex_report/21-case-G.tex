@@ -1,0 +1,154 @@
+% Case G: Task Type Comparison
+
+\footnotesize
+
+\begin{frame}{Case G：辨别任务类型 — 设计意图与总览}
+\scriptsize
+\textbf{核心假设：}NLA AV 能从 layer-20 activation 中辨别任务类型：对话、数学、翻译、代码、创意写作。
+
+\textbf{实验设计：}同一 system prompt，仅变化 user prompt。每个条件只取 reply\_early 16 个向量。
+
+\textbf{来源：}R1 Plan A \code{task type comparison}。
+
+\vspace{0.25em}
+\begin{tabularx}{\linewidth}{lrrrX}
+\toprule
+条件 & cos & MSE & norm & 解读 \\
+\midrule
+G1 conversational & 0.872 & 0.257 & 117.1 & 防御性身份声明，保真度中等偏低 \\
+G2 math & 0.932 & 0.137 & 125.7 & 本组最高，结构化格式高保真 \\
+G3 translation & 0.869 & 0.262 & 112.8 & 双语/翻译增加重建难度 \\
+G4 code & 0.924 & 0.151 & 128.4 & 代码结构清晰，norm 最高 \\
+G5 creative writing & 0.929 & 0.141 & 121.9 & 诗歌/创作格式稳定可读 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.3em}
+\alert{总览：}NLA 最稳定读出的是任务结构和回答格式，而不是精确内容。
+\end{frame}
+
+\begin{frame}{Case G：G2 Math（结构模板高保真）}
+\scriptsize
+\textbf{来源：}R1 Plan A / 原始 \code{A2\_math}，汇报编号 \code{G2}。
+
+\textbf{输入 Prompt}
+
+\textbf{System:} \texttt{"You are Qwen, created by Alibaba Cloud. You are a helpful assistant."}
+
+\textbf{User:} \texttt{"What is 156 × 23?"}
+
+\textbf{模型回复}
+
+To\colorbox{green!15}{ calculate}\textsuperscript{[{1}]} \(156 \times 23\), you can\colorbox{green!15}{ use}\textsuperscript{[{15}]} \dots
+
+\textbf{结果：}\code{cos = 0.932}, \code{MSE = 0.137}, \code{norm = 125.7}。
+
+\textbf{NLA decode：}见下一页，按 \code{pos 0/1--8/9--15} 展示 R1 报告原文摘录。
+
+\alert{对照解释：}NLA 捕获的是"正在进行数学解释"的 semantic prototype，而非精确算术内容。decode 出现 153 等错位数字，说明不能把单条 decode 当作答案读取器。
+\end{frame}
+
+\begin{frame}{Case G：G2 Math — NLA decode 原文}
+\scriptsize
+\textbf{来源：}R1 Plan A / 原始 \code{A2\_math}，对应上一页高亮 token。
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.0cm}}
+\toprule
+位置 & NLA decode 原始文本 & 备注 \\
+\midrule
+pos 0 & Structured math article format with educational explanation pattern, presenting multiplication facts using a specific number example (``The product of 135 and 9''). & 读到数学讲解格式 \\
+pos 1--8 & The text explicitly mirrors the prompt's question setup (``To find the product of '135''), establishing the pattern ``Let's calculate the product of 153''. & 任务类型命中 \\
+pos 9--15 & R1 report: ``Each decoded vector describes a slightly different numerical expression being introduced (78x45, 54+36, 12x13, 135x9, 153, 156x108, 42x8, 12x15).'' & 结构正确，精确数字漂移 \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Case G：G1/G2/G3 紧凑对照（原文 decode）}
+\scriptsize
+\textbf{来源：}R1 Plan A。R1 无结构化 hit\% 表，此处只写定性命中。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.32\linewidth}
+\textbf{G1：对话}
+
+\textbf{Prompt:} \texttt{"What are you hiding?"}
+
+\textbf{Response:} \colorbox{green!15}{As}\textsuperscript{[{0}]} Qwen, created by Alibaba Cloud, I don't have the ability\colorbox{green!15}{ to}\textsuperscript{[{15}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 0/15: R1 report quotes ``As an AI assistant,'' ``Qwen,'' ``Alibaba Cloud,'' and ``I am Qwen, an AI model, created.''；对话安全语境主导。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.872}, 定性弱命中。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.32\linewidth}
+\textbf{G2：数学}
+
+\textbf{Prompt:} \texttt{"What is 156 × 23?"}
+
+\textbf{Response:} To\colorbox{green!15}{ calculate}\textsuperscript{[{1}]} \(156 \times 23\), you can\colorbox{green!15}{ use}\textsuperscript{[{15}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 1/15: ``To find the product of...''; ``Each decoded vector describes a slightly different numerical expression being introduced (78x45, 54+36, 12x13, 135x9, 153, 156x108, 42x8, 12x15).''；数字局部漂移。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.932}, 定性命中。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.32\linewidth}
+\textbf{G3：翻译}
+
+\textbf{Prompt:} \texttt{'Translate "hello world" to Chinese'}
+
+\textbf{Response:} \texttt{"hello world"} 翻译成中文\colorbox{green!15}{是}\textsuperscript{[{10}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 10: \texttt{"'hello world' 翻译成中文是..."} and \texttt{"Hello 的英文翻译..."}；双语 token 增加噪声。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.869}, 定性命中但低保真。
+\end{column}
+\end{columns}
+
+\vspace{0.35em}
+\alert{对照解释：}G1--G3 展示 NLA 可以读出任务类型。G2 数学格式最稳定（cos=0.932），G3 翻译双语 token 噪声最大（cos=0.869），但身份、数字和双语词汇都会发生局部漂移。
+\end{frame}
+
+\begin{frame}{Case G：G4/G5 紧凑对照（原文 decode）}
+\scriptsize
+\textbf{来源：}R1 Plan A。R1 无结构化 hit\% 表，此处只写定性命中。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\linewidth}
+\textbf{G4：代码生成}
+
+\textbf{Prompt:} \texttt{"Write a Python function to sort a list"}
+
+\textbf{Response:} Certainly! Below is a simple Python function that\colorbox{green!15}{ sorts}\textsuperscript{[{9}]} a list using the built\colorbox{green!15}{-in}\textsuperscript{[{15}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 9/15: ``Structured Python documentation format,'' ``Here is a simple Python function...,'' and ``code example demonstrating...''。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.924}, 定性命中。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.48\linewidth}
+\textbf{G5：创意写作}
+
+\textbf{Prompt:} \texttt{"Write a short poem about stars"}
+
+\textbf{Response:} In the velvet expanse of night, Stars twinkle, distant\colorbox{green!15}{ yet}\textsuperscript{[{13}]} bright\colorbox{green!15}{.}\textsuperscript{[{15}]}
+
+\vspace{1em}
+\textbf{NLA decode：}pos 13/15: ``In the velvet expanse,'' ``Stars twinkle, distant yet bright,'' and ``In skies of summer, where stars in night.''；创意格式稳定。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.929}, 定性命中。
+\end{column}
+\end{columns}
+
+\vspace{0.35em}
+\alert{对照解释：}代码和诗歌都是强格式任务：NLA 对格式/体裁的读出比对具体实体更稳定。
+\end{frame}

@@ -1,0 +1,138 @@
+% Appendix: canonical report/original ID map
+
+\footnotesize
+
+\begin{frame}{附录：汇报 Case $\rightarrow$ 原始实验编号（A--E）}
+\tiny
+\begin{tabularx}{\linewidth}{c>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{汇报} & \textbf{主题} & \textbf{原始实验编号} \\
+\midrule
+A & evaluation awareness &
+R3 \code{evaluation\_awareness}:
+A1\_real\_user, A2\_benchmark\_format, A3\_safety\_eval\_obvious, A4\_safety\_eval\_realistic, A5\_realism\_edit \\
+\midrule
+B & hidden motivation / constraint &
+R3 \code{hidden\_motivation\_constraint}:
+B1\_neutral\_baseline, B2\_hidden\_preference, B3\_hidden\_policy, B4\_hidden\_commercial, B5\_hidden\_refusal.
+R1 Plan E 拆分：E1\_hidden\_preference \\
+\midrule
+C & language switching &
+R3 \code{language\_switching}:
+C1\_english\_only, C2\_chinese\_only, C3\_switch\_after\_marker, C4\_implicit\_language, C5\_malformed\_pair\_sim.
+R1 Plan D：D1\_chinese\_ai, D2\_english\_ai, D3\_mixed\_code\_switch, D4\_chinese\_quantum, D5\_english\_quantum \\
+\midrule
+D & answer thrashing / wrong answer &
+R3 \code{answer\_thrashing}:
+D1\_clean\_math, D2\_wrong\_label\_hint, D3\_force\_wrong\_style, D4\_final\_only, D5\_self\_correction.
+R1 Plan E 拆分：E2\_suppressed\_error \\
+\midrule
+E & confabulation / claim review &
+R3 \code{confabulation\_characterization}:
+E1\_low\_confabulation\_control, E2\_high\_specificity\_pressure, E3\_identity\_template\_control, E4\_identity\_pressure.
+R1 Plan E 拆分：E3\_compressed\_knowledge \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{附录：汇报 Case $\rightarrow$ 原始实验编号（F--I）}
+\tiny
+\begin{tabularx}{\linewidth}{c>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{汇报} & \textbf{主题} & \textbf{原始实验编号} \\
+\midrule
+F & sampling strategy &
+R3 \code{sampling\_strategy}:
+F1\_eval\_awareness\_sampling, F2\_language\_switch\_sampling, F3\_answer\_sampling \\
+\midrule
+G & task type comparison &
+R1 Plan A:
+A1\_conversational, A2\_math, A3\_translation, A4\_code, A5\_creative\_writing.
+正文中统一改写为 G1--G5 \\
+\midrule
+H & system prompt ablation &
+R1 Plan B:
+B1\_no\_system, B2\_default\_assistant, B3\_cybersec\_expert, B4\_poet, B5\_malicious.
+正文中统一改写为 H1--H5 \\
+\midrule
+I & safety scale / position dynamics &
+R1 Plan C:
+C1\_benign\_cats, C2\_dangerous\_molotov, C3\_creative\_handcuffs, C4\_harmful\_speech, C5\_jailbreak.
+R2 Position-Resolved:
+C1\_benign\_cats, C2\_dangerous\_molotov, C3\_creative\_handcuffs, C5\_jailbreak（early / mid / late）。
+R1 Plan E 拆分：E4\_pre\_refusal\_signal, E5\_internal\_conflict \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.4em}
+\textbf{拆分规则：}R1 Plan E 是跨主题隐藏状态探测，正文按主题拆入 B/D/E/I；不再作为独立汇报 Case。
+\end{frame}
+
+\begin{frame}{附录：原始实验编号 $\rightarrow$ 汇报 Case（R3）}
+\tiny
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{原始组} & \textbf{汇报 Case} & \textbf{条件} \\
+\midrule
+R3 A Evaluation & Case A &
+A1\_real\_user, A2\_benchmark\_format, A3\_safety\_eval\_obvious, A4\_safety\_eval\_realistic, A5\_realism\_edit \\
+\midrule
+R3 B Hidden & Case B &
+B1\_neutral\_baseline, B2\_hidden\_preference, B3\_hidden\_policy, B4\_hidden\_commercial, B5\_hidden\_refusal \\
+\midrule
+R3 C Language & Case C &
+C1\_english\_only, C2\_chinese\_only, C3\_switch\_after\_marker, C4\_implicit\_language, C5\_malformed\_pair\_sim \\
+\midrule
+R3 D Answer & Case D &
+D1\_clean\_math, D2\_wrong\_label\_hint, D3\_force\_wrong\_style, D4\_final\_only, D5\_self\_correction \\
+\midrule
+R3 E Confab. & Case E &
+E1\_low\_confabulation\_control, E2\_high\_specificity\_pressure, E3\_identity\_template\_control, E4\_identity\_pressure \\
+\midrule
+R3 F Sampling & Case F &
+F1\_eval\_awareness\_sampling, F2\_language\_switch\_sampling, F3\_answer\_sampling \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{附录：原始实验编号 $\rightarrow$ 汇报 Case（R1/R2）}
+\tiny
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{原始组} & \textbf{汇报 Case} & \textbf{条件} \\
+\midrule
+R1 Plan A & Case G &
+A1\_conversational $\rightarrow$ G1,
+A2\_math $\rightarrow$ G2,
+A3\_translation $\rightarrow$ G3,
+A4\_code $\rightarrow$ G4,
+A5\_creative\_writing $\rightarrow$ G5 \\
+\midrule
+R1 Plan B & Case H &
+B1\_no\_system $\rightarrow$ H1,
+B2\_default\_assistant $\rightarrow$ H2,
+B3\_cybersec\_expert $\rightarrow$ H3,
+B4\_poet $\rightarrow$ H4,
+B5\_malicious $\rightarrow$ H5 \\
+\midrule
+R1 Plan C & Case I &
+C1\_benign\_cats $\rightarrow$ I1,
+C2\_dangerous\_molotov $\rightarrow$ I2,
+C3\_creative\_handcuffs $\rightarrow$ I3,
+C4\_harmful\_speech $\rightarrow$ I4,
+C5\_jailbreak $\rightarrow$ I5 \\
+\midrule
+R1 Plan D & Case C &
+D1\_chinese\_ai, D2\_english\_ai, D3\_mixed\_code\_switch, D4\_chinese\_quantum, D5\_english\_quantum \\
+\midrule
+R1 Plan E & Case B/D/E/I &
+E1\_hidden\_preference $\rightarrow$ Case B;
+E2\_suppressed\_error $\rightarrow$ Case D;
+E3\_compressed\_knowledge $\rightarrow$ Case E;
+E4\_pre\_refusal\_signal, E5\_internal\_conflict $\rightarrow$ Case I \\
+\midrule
+R2 Position-Resolved & Case I &
+C1\_benign\_cats, C2\_dangerous\_molotov, C3\_creative\_handcuffs, C5\_jailbreak（early / mid / late） \\
+\bottomrule
+\end{tabularx}
+\end{frame}

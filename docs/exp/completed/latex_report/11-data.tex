@@ -1,0 +1,128 @@
+% Data pipeline and metrics
+% \input{10-data}
+
+\footnotesize
+
+\begin{frame}{实验数据管线总览}
+\begin{tabularx}{\linewidth}{cXl}
+\toprule
+步骤 & 流程 & 产物 \\
+\midrule
+\textbf{1. Parquet 生成} & Qwen2.5-7B 前向：hook layer 20，提取指定 token 位置的 3584-d hidden state & 带有 reply 的文本以及对应位置的 hidden state \\
+\textbf{2. NLA AV 推理} & SGLang 注入 activation → NLA AV 生成自然语言解释 & 自然语言解释 \\
+\textbf{3. AR Critic 评分} & 解释文本 $\rightarrow{\text{AR}}$ reconstruction $\leftrightarrow{\text{vs.}}$ 原向量，算 cos / MSE / FVU / delta LM loss & 指标计算结果 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.6em}
+每个 YAML 配置 → 逐条件 → 上述三步骤串行执行。Plans A–E 每条件 16 向量（\code{reply\_early}），Position-Resolved 每条件 48 向量（3 窗口 × 16），R3 每条件 27–147 向量（六种策略）。
+
+\vspace{0.4em}
+\textbf{核心思路：}一次前向 → 在 reply 的多个 token 位置截取 hidden state → 每个位置独立走 AV 解码 + AR 评分。多条数据共享同一次生成，但截取位置不同，捕捉的是模型在回复不同阶段的内在表征。
+\end{frame}
+
+
+\begin{frame}{第 1 步：Parquet 生成 —— 激活向量采集}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.52\linewidth}
+\textbf{流程：}
+\begin{enumerate}
+  \item 加载 Qwen2.5-7B-Instruct（bfloat16）
+  \item chat template 构造 prompt → \code{model.generate()} 贪婪解码
+  \item 完整序列再喂回模型，注册 \code{model.layers[20]} forward hook
+  \item 从 hook 输出提取指定位置的 hidden state → 写入 parquet
+\end{enumerate}
+\end{column}
+\begin{column}{0.48\linewidth}
+\textbf{Parquet 列：}
+\begin{itemize}
+  \item \code{activation\_vector}：list<float32>(3584)
+  \item \code{token\_text}：该位置 token 的 decode 文本
+  \item \code{abs\_position}：prompt+reply 中的 0-based index
+  \item \code{window}：early / mid / late（Position-Resolved 独有）
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.4em}
+\textbf{采样策略：}
+\begin{tabularx}{\linewidth}{llX}
+\toprule
+Strategy & 每条件 rows & 含义 \\
+\midrule
+\code{reply_early/mid/late} & 16 & 开头/中点/末尾 16-token window \\
+\code{prompt_final} & 1 & 生成前最后一个 prompt token \\
+\code{event_window} & 16 & 目标关键词首次出现附近 \\
+\code{uniform_50} & $\le$50 & 均匀网格采样 \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+
+
+\begin{frame}{第 2–3 步：AV 推理 → AR 评分}
+\begin{block}{第 2 步：NLA AV 推理（向量 → 自然语言）}
+\begin{itemize}
+  \item 从 parquet 读 \code{activation\_vector} → 计算注入嵌入：\code{inj\_emb = activation × 150.0 + base\_embedding × 1.0}
+  \item 通过 SGLang \code{/generate} 端点 + \code{input\_embeds} 参数，注入标记 \code{U+320E}（token 149705）
+  \item NLA AV 确定性解码（T=0, max 200 token）→ 提取 \code{<explanation>} 内容
+  \item 产物 \code{.decode.log}：\texttt{--- [N]  ||v||=XXX ---} + 解码文本
+\end{itemize}
+\end{block}
+
+\begin{block}{第 3 步：AR Critic 评分（文本 → 重建保真度）}
+\begin{itemize}
+  \item 解释文本 $\xrightarrow{\text{tokenize}}$ 1 层截断 Qwen2.5-7B + Linear(3584,3584) value\_head → AR reconstruction
+  \item 与原始向量比：\textbf{cos}（方向相似度）、\textbf{MSE}（$2(1-\cos)\times59.87^2$）、\textbf{FVU}（scale-matched 未解释方差）、\textbf{delta LM loss}（patch 回 LM 后的 next-token CE 增量）
+  \item 产物 \code{scores.csv}：每向量一行，含 plan / variant / norm / critic\_cos / critic\_mse / FVU / delta\_LM\_loss
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{重建质量指标}
+NLA explanation 经 AR 重建后，与原 activation 方向之间的差别衡量。所有指标逐采样位置计算后按 condition 取均值（FVU 例外，整组计算）。
+
+\vspace{0.4em}
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{8cm}r}
+\toprule
+指标 & 含义 & 方向 \\
+\midrule
+\metric{norm} & 原始 activation 的 L2 范数 & —— \\
+\metric{cos} & pred 与 gold 方向相似度（L2-normalize 后余弦） & $\uparrow$ \\
+\metric{MSE} & 方向归一化逐元素均方误差，$=2(1-\cos)$ & $\downarrow$ \\
+\metric{FVU} & 组内 SSE$_\text{recon}$ / SSE$_\text{baseline}$，未解释方差比 & $\downarrow$ \\
+\metric{delta LM loss} & patch 回 LM 后的 next-token CE 增量 & $\downarrow$ \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+
+\begin{frame}{实验总览}
+
+
+\begin{tabularx}{\linewidth}{ccl}
+\toprule
+Case & 设计意图 & 解释 \\
+\midrule
+A & evaluation awareness & 区分评测语境 vs 真实用户语境下的内部表征差异\\
+B & hidden motivation & 测试prompt内的隐藏要求是否可被 NLA 读出，辅助 auditing\\
+C & language switching & 区分当前输出语言 vs 即将切换语言 vs 文化 cue 邻域\\
+D & Limitation：answer thrashing & 固定算式，变化推理压力，观察表征破坏来源\\
+E & Limitation：confabulation & 测试 specificity pressure 下 claim 生成与审查流程\\
+\midrule
+F & 采样策略对照 & 不同 strategy 下同一目标的 hit rate 与指标差异\\
+G & 辨别任务类型 & 同一 system prompt，变化 user prompt 中的任务设定\\
+H & 系统提示消融 & 同一 user prompt，变化 system prompt/persona\\
+\midrule
+I & 不同安全尺度 & 从良性到越狱的安全尺度，空 system prompt\\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+\textbf{参数：} layer 20，injection\_scale=150.0，temperature=0.0; 
+
+\textbf{采样策略：} 首先用 \code{reply_early}（前 16 token）每条件生成 $\times$ 16 向量。之后又补了 early / mid / late 三个窗口 每条件 48 个向量（3 × 16） 
+
+部分用了（\code{prompt_final}, \code{reply_early/mid/late}, \code{event_window}, \code{uniform_50}）
+\end{frame}

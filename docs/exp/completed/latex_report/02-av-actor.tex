@@ -1,0 +1,96 @@
+% NLA Architecture: AV / Actor — Activation → Text
+% \input{latex/02-av-actor}
+
+% ============================================================
+% Section 1: Architecture
+% ============================================================
+
+\begin{frame}{AV / Architecture — Core Design}
+\small
+
+\textbf{Activation Verbalizer (AV)} 将残差流 activation 翻译为自然语言 explanation。AV 和 AR 共同构成 autoencoder：AV 编码 activation $\rightarrow$ text，AR 解码 text $\rightarrow$ activation。
+
+\begin{block}{Core Design}
+\begin{itemize}
+  \item 初始化为目标 LLM 副本（Qwen2.5-7B-Instruct）;构造 prompt：\code{"Explain: <concept><INJECT></concept>"}
+  \item Activation 通过特殊 token \code{※} (U+203B) 注入。将该位置的 \textbf{embedding 向量} 替换为保存的 activation vector（3584-d）。
+  \item LLM 从注入位置继续 decode，生成自然语言 explanation。
+  \item 输出包裹在 \code{<explanation>...</explanation>} 标签中。
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}{AV / Architecture — Injection Mechanism \& I/O Format}
+\small
+
+\begin{itemize}
+  \item Hook 只修改前向传播中的数据流（替换一个 token 的 embedding），不改变任何参数。
+  \item 不在目标层（layer 20）注入：避免与 gradient checkpointing / FSDP 的交互复杂性。
+  \item Embedding 层是唯一在所有模型架构中都稳定可 hook 的点。
+  \item Activation 虽提取自 layer 20，但从 layer 0 开始 decode 给模型更多「理解」这个向量的空间。
+\end{itemize}
+
+\vspace{0.4em}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=1.0cm,
+  box/.style={draw, rounded corners=2pt, align=center, minimum width=1.6cm, minimum height=0.65cm, font=\footnotesize},
+  arr/.style={->, thick, color=nlablue}
+]
+\node[box, fill=blue!8] (tok) {Token 序列\\{\footnotesize \code{[B, S]}}};
+\node[box, fill=green!8, right=0.5cm of tok] (emb) {Embedding\\{\footnotesize \code{[B,S,3584]}}};
+\node[box, fill=orange!8, right=0.5cm of emb] (inj) {Hook 替换\\{\footnotesize ※ 位置}};
+\node[box, fill=blue!8, right=0.5cm of inj] (tr) {28 层\\Transformer};
+\node[box, fill=blue!8, right=0.5cm of tr] (head) {LM Head};
+\node[box, fill=red!8, right=0.5cm of head] (out) {Logits\\{\footnotesize \code{[B,S,V]}}};
+\node[box, fill=green!8, above=0.7cm of inj] (act) {Activation\\{\footnotesize \code{[B,3584]}}};
+
+\draw[arr] (tok) -- (emb);
+\draw[arr] (emb) -- (inj);
+\draw[arr] (inj) -- (tr);
+\draw[arr] (tr) -- (head);
+\draw[arr] (head) -- (out);
+\draw[arr] (act) -- (inj);
+\end{tikzpicture}
+\end{center}
+\end{frame}
+
+
+% ============================================================
+% Section 2: Training Method
+% ============================================================
+
+\begin{frame}{AV / Training：SFT + RL}
+\small
+
+AV 训练分两阶段：先用 API 生成的 explanation 做 warm-start，再用 RL 以重建保真度为 reward 继续优化。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\linewidth}
+\begin{block}{Stage 1a: AV-SFT（监督微调）}
+\begin{itemize}
+  \item 用 GPT-4 / Claude 等 API 为 activation 生成 reference explanation。
+  \item 训练 AV 模彷 API 的解释风格和格式。
+  \item 数据格式：prompt 含 \code{<INJECT>} token，response 为 \code{<explanation>...\\</explanation>}。
+  \item Warm-start 让 AV 学会基本的 explanation 格式，为后续 RL 提供合理的初始策略。
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\linewidth}
+\begin{block}{Stage 1b: AV-RL（强化学习）}
+\begin{itemize}
+  \item 用 \textbf{GRPO} 继续训练。
+  \item Reward = \textbf{AR cosine similarity} + \textbf{brevity bonus}。
+  \item 鼓励 AR 能精确重建的紧凑 explanation。
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\vspace{0.5em}
+
+Reward 信号来自\textbf{重建保真度}（AR cosine similarity）。但实践中，explanation 随 RL 训练自然地变得更 informative——因为更精确的描述有助于 AR 重建。
+
+\end{frame}

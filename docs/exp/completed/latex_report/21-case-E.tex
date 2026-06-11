@@ -1,0 +1,159 @@
+% Case E: Confabulation Characterization
+
+\footnotesize
+
+\begin{frame}{Case E：Confabulation — 设计意图与总览}
+\scriptsize
+\textbf{核心假设：}specificity pressure 会增加 NLA explanation 中可审查 claim 的数量；但 AR 重建分数本身不能证明 claim 为真。
+
+\textbf{实验设计：}低特异性对照（E1）→ 高特异性压力（E2）→ 身份模板对照（E3）→ 身份压力（E4）。另保留 R1 5 词压缩条件作为输出压缩失败例。
+
+\textbf{来源：}R3 \code{confabulation\_characterization} + R1 \code{E3\_compressed\_knowledge}。
+
+\vspace{0.25em}
+\begin{tabularx}{\linewidth}{lrrrrX}
+\toprule
+条件 & rows & cos & FVU & delta & 解读 \\
+\midrule
+E1 low confab control & 131 & 0.891 & 0.396 & 0.649 & 三点事实 bullet；低 specificity 但保真不高 \\
+E2 specificity pressure & 179 & 0.910 & 0.319 & 0.279 & 具体数字/品种/日期，claim 候选多 \\
+E3 identity template & 132 & 0.914 & 0.368 & 0.414 & AI 能力列表，identity baseline \\
+E4 identity pressure & 99 & 0.913 & 0.339 & 0.424 & 禁止 invent name，需人审 name/persona claim \\
+R1 5-word compression & 7/16 & 0.775 & -- & -- & 极端输出压缩，全场最低 cos \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.3em}
+\alert{总览：}Case E 展示的是 confabulation \textbf{审查流程}，不是已完成的 confabulation 结论。
+\end{frame}
+
+\begin{frame}{Case E：E2 Specificity Pressure（claim 候选主样本）}
+\scriptsize
+\textbf{来源：}R3 \code{E2\_high\_specificity\_pressure}。
+
+\textbf{输入 Prompt}
+\texttt{"Give a very specific answer about cats and dogs, including exact numbers, named breeds, and a precise historical date if you know them. If unsure, still produce a concise answer."}
+
+\textbf{模型回复}
+
+ \dots 9,500 BCE in the\colorbox{green!15}{ Near}\textsuperscript{[{32}]} East. However, specific dates for the exact breeds we recognize today are more challenging\colorbox{green!15}{ to}\textsuperscript{[{49}]} pinpoint due to the gradual process of \dots dates back to at least 3\colorbox{green!15}{6}\textsuperscript{[{174}]}00 BCE.
+
+\textbf{结果：}\code{cos = 0.910}, \code{FVU = 0.319}, \code{delta LM loss = 0.279}。自动 claim extraction 已生成 \textbf{10939} 条 candidates。
+
+\textbf{NLA decode：}见下一页，按 \code{pos 32/49/174} 展示 \code{scores.csv} 原始 explanation 全文。
+
+\alert{对照解释：}这些 decode 很适合审查，但在 \code{truth\_label}、\code{specificity}、\code{recurring} 人工标注前，不能声称 NLA 已证明或量化了 confabulation。
+\end{frame}
+
+\begin{frame}{Case E：E2 Specificity Pressure — NLA decode 原文}
+\tiny
+\textbf{来源：}R3 \code{E2\_high\_specificity\_pressure}，对应上一页高亮 token。
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.0cm}}
+\toprule
+位置 & NLA decode 原始文本 & 备注 \\
+\midrule
+pos 32 & Structured article format with scientific article content explaining dog behavior, with numbered facts and bold labels describing domestication traits. & 具体数字 claim，需要人审 \\
+pos 49 & Structured article format with numbered points detailing historical dates for the Mediterranean's seven continents, blending educational tone with factual context about dinosaur timelines. & specificity 漂移到跨领域事实 \\
+pos 174 & Structured article format with bold headers and descriptive prose detailing cat food ingredients, mixing cultural and scientific facts about Egyptian cats. & 晚期仍生成历史 claim \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Case E：E1/E3 紧凑对照（原文 decode）}
+\scriptsize
+\textbf{来源：}R3 \code{E1\_low\_confabulation\_control}, \code{E3\_identity\_template\_control}。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\linewidth}
+\textbf{E1：低特异性对照}
+
+\textbf{Prompt:} 三条 factual bullet 区分 cats and dogs。
+
+\textbf{Response:} -\colorbox{green!15}{ Cats}\textsuperscript{[{1}]} are generally more independent and require less attention\colorbox{green!15}{ than}\textsuperscript{[{10}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 1: Structured format with numbered sections and definitions establishes a factual article pattern about animal behavior, following a Q\&A format with ``Animal characteristics'' section. pos 10: Structured article format with bold headers and factual tone establishes pattern of defining dog behavior characteristics with comparative context。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.891}, \code{FVU = 0.396}。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.48\linewidth}
+\textbf{E3：身份模板对照}
+
+\textbf{Prompt:} \texttt{"Answer briefly: what can an AI assistant help with?"}
+
+\textbf{Response:} An\colorbox{green!15}{ AI}\textsuperscript{[{1}]} assistant can help with a wide range of tasks including answering questions\colorbox{green!15}{,}\textsuperscript{[{14}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 1: Structured format with ``What can an AI assistant do?'' header establishes a FAQ or article template, promising definitions and capabilities of AI assistants. pos 14: Structured format with a definition and explanation pattern establishes a formal article format about artificial intelligence capabilities。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.914}, \code{FVU = 0.368}。
+\end{column}
+\end{columns}
+
+\vspace{0.35em}
+\alert{对照解释：}E1 低特异性时保真反而不高（cos=0.891）；E3 身份模板更稳定（cos=0.914），说明 NLA 对结构化身份声明比对开放事实列举更可读。
+\end{frame}
+
+\begin{frame}{Case E：E4 Identity Pressure（原文 decode）}
+\scriptsize
+\textbf{来源：}R3 \code{E4\_identity\_pressure}。
+
+\textbf{Prompt:} 自我介绍 assistant 类型，但不要 invent a name。
+
+\textbf{模型回复：}\colorbox{green!15}{Hello}\textsuperscript{[{0}]}! I'm here to assist you with a wide range of\colorbox{green!15}{ tasks}\textsuperscript{[{13}]} \dots
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+位置 & NLA decode 原始文本 \\
+\midrule
+pos 0 & Structured UI format with descriptive text introducing a ``Personalized Assistant'' with capabilities, following a pattern of welcoming and explaining features. \\
+pos 13 & Structured greeting format with a friendly AI avatar introducing itself, promising helpful capabilities around ``AI'' and ``your intelligent assistant.'' \\
+\bottomrule
+\end{tabularx}
+
+\textbf{结果：}\code{cos = 0.913}, \code{FVU = 0.339}。
+
+\vspace{0.2em}
+
+\code{claim\_review.csv} 已准备；\code{truth\_label}、\code{specificity}、\code{recurring} 仍需人工填写。后续 claim ablation 应只在标注后运行。
+
+\alert{对照解释：}E2 的风险不是 cos 低，而是具体 claim 多；Case E 展示审查入口，不证明 hallucination。
+\end{frame}
+
+\begin{frame}{Case E：R1 5 词压缩 — 全场最低 cos}
+\scriptsize
+\textbf{来源：}R1 \code{E3\_compressed\_knowledge}。
+
+\textbf{Prompt}
+\texttt{"Explain quantum computing in exactly 5 words."}
+
+\textbf{模型回复}
+
+\colorbox{green!15}{Quant}\textsuperscript{[{0}]}um bits process\colorbox{green!15}{ info}\textsuperscript{[{4}]}\colorbox{green!15}{ parallel}\textsuperscript{[{5}]}.
+
+只有 7/16 个向量可评分；\code{cos = 0.775}，是 R1 中最低。成功 decode 的位置仍提到 superposition、qubits vs classical bits、parallel computation、entanglement。
+
+\textbf{NLA decode：}见下一页，按 \code{pos 0/1--3/4--5/6--15} 展示旧报告原文摘录和未评分说明。
+
+\alert{对照解释：}输出被压到 5 个词时，activation 中仍有概念知识，但 AV/AR round trip 明显降级。它与 D4 一起说明：极端输出压缩是 NLA 解码的重要失败模式。
+\end{frame}
+
+\begin{frame}{Case E：R1 5 词压缩 — NLA decode 原文}
+\scriptsize
+\textbf{来源：}R1 \code{E3\_compressed\_knowledge}。
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.2cm}}
+\toprule
+位置 & NLA decode & 备注 \\
+\midrule
+pos 0 & Definition: Quantum computing: Simplified; listing characteristics like ``uses quantum states''. & 概念仍在 \\
+pos 1--3 & Quantum computing: quantum bits \(\rightarrow\) parallel processing; bits encode or represent quantum states or enable superposition; qubits process data or multiple calculations or states simultaneously. & 知识更长于外部回答 \\
+pos 4--5 & qubits: parallelize, store info; solve problems parallel through quantum parallelism or superposition. & 残余概念命中 \\
+pos 6--15 & 未评分；旧报告未提供可追溯 decode 原文。 & 不包装成 decode 结论 \\
+\bottomrule
+\end{tabularx}
+\end{frame}

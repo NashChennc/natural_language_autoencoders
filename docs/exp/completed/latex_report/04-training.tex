@@ -1,0 +1,54 @@
+% NLA Architecture: Training Pipeline (Stage 0–3)
+% \input{latex/04-training}
+
+\begin{frame}{NLA 的核心结构}
+\begin{itemize}
+  \item 目标：把目标模型某层 activation $h_\ell$ 翻译成自然语言解释 $z$。
+  \item AV：Activation Verbalizer，$h_\ell \mapsto z$。
+  \item AR：Activation Reconstructor，$z \mapsto \hat h_\ell$。
+  \item 训练目标：
+  \[
+    \min_{\phi,\theta}\;
+    \mathbb{E}_{h_\ell \sim \mathcal H}
+    \mathbb{E}_{z \sim AV_\phi(\cdot \mid h_\ell)}
+    \|h_\ell - AR_\theta(z)\|_2^2 .
+  \]
+\end{itemize}
+\end{frame}
+
+\begin{frame}{NLA RL 迭代}
+
+先做一个监督代理任务：
+  \begin{itemize}
+    \item AV：activation $\to$ Claude 生成的摘要；
+    \item AR：摘要 $\to$ 原 activation。
+  \end{itemize}
+warm-start 后已有可用信号，FVE 通常约 $0.3$--$0.4$。然后进行迭代：
+
+\begin{enumerate}
+  \item 采样一批目标 activation $h_\ell$。
+  \item AV 对每个 $h_\ell$ 采样一组解释：
+  \[
+    z_1,\dots,z_G \sim AV_\phi(\cdot \mid h_\ell).
+  \]
+  \item AR 根据解释重构 activation $\hat h_i = AR_\theta(z_i)$ ，利用重构误差进行 SFT
+  \item 用原始重构误差给 AV 奖励，用 GRPO/RL 更新：
+  \[
+    r(h_\ell,z_i) = -\|h_\ell - AR_\theta(z_i)\|_2^2.
+  \]
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{退化风险}
+\begin{itemize}
+  \item 风险一：AV/AR 学出人类看不懂、但 AR 能解码的暗号。
+  \item 风险二：AV 直接复读输入上下文，而不是解释 activation。
+  \item 论文中的缓解方式：
+  \begin{itemize}
+    \item SFT warm-start 保持自然语言分布；
+    \item \textbf{对 AV 加 KL penalty，约束其接近初始化}；
+    \item activation normalization 提高训练稳定性；
+    \item 文本瓶颈长度限制，降低完整输入反演能力。
+  \end{itemize}
+\end{itemize}
+\end{frame}

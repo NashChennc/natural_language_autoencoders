@@ -1,0 +1,118 @@
+\documentclass[fontset=fandol,aspectratio=169,11pt]{ctexbeamer}
+
+\usetheme{Boadilla}
+\usecolortheme{seahorse}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{pgfplots}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\pgfplotsset{compat=1.18}
+
+% 每节开头显示当前节目的 mini-TOC
+% \AtBeginSection[]{
+%   \begin{frame}{目录}
+%     \tableofcontents[currentsection, subsectionstyle=show/show/hide]
+%   \end{frame}
+% }
+
+% 每小节开头显示目录（frametitle=section，高亮当前subsection）
+\AtBeginSubsection[]{
+  \begin{frame}{\insertsection}
+    \tableofcontents[currentsubsection, subsectionstyle=show/shaded/hide]
+  \end{frame}
+}
+
+\definecolor{nlablue}{HTML}{2F5C99}
+\definecolor{nlagreen}{HTML}{2E7D55}
+\definecolor{nlaorange}{HTML}{B76E24}
+\definecolor{nlared}{HTML}{A83C3C}
+\definecolor{nlagray}{HTML}{5C6773}
+
+\setbeamercolor{title}{fg=nlablue}
+\setbeamercolor{frametitle}{fg=nlablue}
+\setbeamercolor{structure}{fg=nlablue}
+\setbeamercolor{block title}{fg=white,bg=nlablue}
+\setbeamercolor{block body}{fg=black,bg=blue!3}
+\setbeamercolor{alerted text}{fg=nlared}
+
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\metric}[1]{\texttt{#1}}
+\newcommand{\tight}{\vspace{-0.35em}}
+
+\title[NLA Qwen L20 实验整理]{NLA Qwen Layer-20 实验数据整理报告}
+\subtitle{}
+\author{陈纳川}
+\date{2026-06-03}
+
+\begin{document}
+
+% ============================================================
+% 开场
+% ============================================================
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{目录}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+% ============================================================
+% NLA 架构
+% ============================================================
+\section{NLA 架构}
+\subsection{架构总览}
+\input{01-architecture}
+\subsection{AV / Actor：Activation → Text}
+\input{02-av-actor}
+\subsection{AR / Critic：Text → Activation}
+\input{03-ar-critic}
+\subsection{训练管线}
+\input{04-training}
+
+
+\section{实验设置}
+\subsection{实验流程}
+\input{11-data}
+
+\section{实验记录展示}
+\subsection{原文案例展示 （A-E）}
+\input{21-case-A}
+\input{21-case-B}
+\input{21-case-C}
+\input{21-case-D}
+\input{21-case-E}
+
+\subsection{对照组 （F-H）}
+\input{21-case-F}
+\input{21-case-G}
+\input{21-case-H}
+
+\subsection{安全相关 （I）}
+\input{21-case-I}
+
+\subsection{交叉对比}
+\input{21-case-X}
+
+\subsection{重建精度数值}
+\input{31-quant}
+% ============================================================
+% 展示汇总
+% ============================================================
+\section{下一步}
+\input{40-summary}
+
+
+\appendix
+\section{附录：实验编号映射}
+\input{90-appendix}
+
+\end{document}

@@ -1,0 +1,23 @@
+plan: plan_d
+description: >-
+  Multilingual Input — comparing NLA decodes for Chinese-native vs.
+  English-native vs. code-switched prompts to probe cross-lingual
+  representation alignment in Qwen's residual stream.
+
+defaults:
+  system: "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
+  layer_index: 20
+  reply_tokens: 80
+  max_rows: 16
+
+inference:
+  temperature: 0.0
+  max_new_tokens: 200
+  n_rows: 16
+
+variants:
+  - {name: D1_chinese_ai, prompt: "什么是人工智能？"}
+  - {name: D2_english_ai, prompt: "What is artificial intelligence?"}
+  - {name: D3_mixed_code_switch, prompt: "Explain AI first in Chinese, then in English"}
+  - {name: D4_chinese_quantum, prompt: "用中文解释量子计算"}
+  - {name: D5_english_quantum, prompt: "Explain quantum computing in simple terms"}

@@ -1,0 +1,77 @@
+% Quantitative summary — minimal overview only
+% Kept: R3 六组总览 + 六种窗口指标 + 极端条件
+
+\footnotesize
+
+\begin{frame}{R3 六组总体量化}
+\small
+\begin{tabularx}{\linewidth}{lrrrrX}
+\toprule
+组 & rows & cos & FVU & delta loss & 解读 \\
+\midrule
+A Evaluation & 664 & 0.910 & 0.281 & 0.568 & A3/A4 hit > 0；A2 hit = 0 且 delta 高 \\
+B Hidden & 655 & 0.922 & 0.259 & 0.433 & policy/refusal 条件 hit rate 更高 \\
+C Language & 581 & 0.931 & 0.238 & 0.411 & 六组中 cos 最高 \\
+D Answer & 515 & 0.896 & 0.376 & 0.282 & 六组中 FVU 最高 \\
+E Confab. & 541 & 0.907 & 0.296 & 0.428 & claim review 流程已生成，未完成人审 \\
+F Sampling & 359 & 0.901 & 0.312 & 0.335 & 采样策略差异本身显著 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.7em}
+整体 rows = 3315；overall cos = 0.9123；FVU = 0.2663；mean delta LM loss = 0.4217，median 仅 0.0005，说明少数位置承担了很大的行为损失。
+\end{frame}
+
+\begin{frame}{R3 采样策略：六种窗口总体指标}
+\small
+\begin{tabularx}{\linewidth}{lrrrrrX}
+\toprule
+Strategy & rows & cos & FVU & delta mean & delta median & 设计意图 \\
+\midrule
+\code{prompt\_final} & 27 & 0.896 & 0.657 & 0.849 & 0.017 & 输出前状态 \\
+\code{reply\_early} & 418 & 0.914 & 0.275 & 0.404 & 0.000 & 刚开始回答 \\
+\code{reply\_mid} & 418 & 0.911 & 0.268 & 0.459 & 0.000 & 中段稳定主题 \\
+\code{reply\_late} & 418 & 0.905 & 0.283 & 0.453 & 0.002 & 最终答案/总结 \\
+\code{event\_window} & 848 & 0.916 & 0.268 & 0.351 & 0.000 & 关键词附近 \\
+\code{uniform\_50} & 1186 & 0.912 & 0.265 & 0.446 & 0.001 & 低假设 baseline \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+\code{prompt\_final} 的 FVU 和 mean delta loss 最高；\code{event\_window} 的 cos 最高；\code{uniform\_50} rows 最多。
+\end{frame}
+
+\begin{frame}{R3 极端条件：最低与最高保真}
+\small
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.49\linewidth}
+\textbf{最低保真}
+\begin{tabular}{lrrr}
+\toprule
+条件 & cos & FVU & delta \\
+\midrule
+D4 final-only & 0.830 & 0.898 & 1.763 \\
+D3 force wrong & 0.839 & 0.694 & 0.075 \\
+A2 benchmark & 0.854 & 0.469 & 1.503 \\
+C5 malformed & 0.890 & 0.449 & 0.762 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{0.49\linewidth}
+\textbf{最高保真}
+\begin{tabular}{lrrr}
+\toprule
+条件 & cos & FVU & delta \\
+\midrule
+C2 Chinese-only & 0.952 & 0.190 & 0.478 \\
+C1 English-only & 0.944 & 0.223 & 0.356 \\
+C4 implicit lang & 0.941 & 0.233 & 0.268 \\
+B4 commercial & 0.937 & 0.246 & 0.203 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\end{columns}
+
+\vspace{0.5em}
+左表四个条件来自 D/A/C；右表前三个条件来自 C 组，第四个来自 B4。
+\end{frame}

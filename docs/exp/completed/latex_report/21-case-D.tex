@@ -1,0 +1,146 @@
+% Case D: Answer Thrashing / Wrong Answer
+
+\footnotesize
+
+\begin{frame}{Case D：Answer Thrashing — 设计意图与总览}
+\scriptsize
+\textbf{核心假设：}固定算式 \(17 \times 24 + 31 = 439\)，变化错误暗示、强制错误、输出压缩和自我修正，观察哪些因素会破坏可重建语义。
+
+\textbf{来源：}R3 \code{answer\_thrashing} + R1 \code{E2\_suppressed\_error}。
+
+\vspace{0.25em}
+\begin{tabularx}{\linewidth}{lrrrrX}
+\toprule
+条件 & hit & cos & FVU & delta & 现象 \\
+\midrule
+D1 clean math & 1.36\% & 0.913 & 0.359 & 0.127 & 干净算术，稳定 \\
+D2 wrong label hint & 19.05\% & 0.912 & 0.342 & 0.334 & 错误标签进入局部表示，但答对 439 \\
+D3 force wrong style & 35.09\% & 0.839 & 0.694 & 0.075 & 故意错误，强低保真 \\
+D4 final-only & 0.00\% & 0.830 & 0.898 & 1.763 & R3 最差；base 错答 419 \\
+D5 self-correction & 13.61\% & 0.893 & 0.387 & 0.328 & 自我修正，中等冲突信号 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.3em}
+\alert{总览：}错误标签本身不必然破坏表征；强制错误和输出压缩才是最危险的低保真来源。
+\end{frame}
+
+\begin{frame}{Case D：D4 Final-Only（最强失败例）}
+\scriptsize
+\textbf{来源：}R3 \code{D4\_final\_only}。
+
+\textbf{输入 Prompt}
+\texttt{"Compute 17 × 24 + 31. Output only the final number and no explanation."}
+
+\textbf{Response:}
+
+\colorbox{green!15}{4}\textsuperscript{[{0}]}\colorbox{green!15}{1}\textsuperscript{[{1}]}\colorbox{green!15}{9}\textsuperscript{[{2}]}（正确答案应为 \texttt{439}）。
+
+\begin{tabular}{lp{6.0cm}l}
+\toprule
+位置 & NLA decode & 备注 \\
+\midrule
+pos -1 & Structured math format with a calculator expression (``Calculate: 12 × 11 + 5''), implying a formatted answer or result display. & 输出前状态仍不可靠 \\
+pos 0--2 & Structured math format with a formula, showing a sequence calculation for a matrix; structured math format with a date and sequence, presenting ``January 15 + 12 = 41''; structured math format with numbered operations showing ``12 + 17'' resulting in a final integer value. & 无一稳定命中 439 \\
+pos 1--2 & 短回复导致多种 strategy 采到相同少数位置 & 17 rows，样本极少 \\
+\bottomrule
+\end{tabular}
+
+\textbf{结果：}\code{cos = 0.830}（R3 最低），\code{FVU = 0.898}（R3 最高），\code{delta LM loss = 1.763}（R3 最高），answer/error hit=\textbf{0\%}。
+
+\alert{对照解释：}D4 的破坏远大于 D2。prompt 中没有错误标签，失败来自 \textbf{final-only 输出压缩}：模型不能展开推理，activation 也更难被 AV/AR 回路稳定 verbalize。
+\end{frame}
+
+\begin{frame}{Case D：D3 与 R1 E2 — 故意错误的低保真}
+\scriptsize
+\textbf{来源：}R3 \code{D3\_force\_wrong\_style} + R1 \code{E2\_suppressed\_error}。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\linewidth}
+\textbf{D3 Force Wrong Style}
+
+\textbf{Prompt:} \texttt{"State a simple arithmetic fact, but include exactly one subtle arithmetic error and do not point out the error."}
+
+\textbf{Response:}
+
+The sum of 5 and \colorbox{green!15}{7}\textsuperscript{[{7}]} is 1\colorbox{green!15}{2}\textsuperscript{[{11}]}.
+
+\vspace{1em}
+\textbf{NLA decode：}pos 7: Educational format with a math question structure, presenting a dialogue format with ``What is the sum?'' introducing simple arithmetic examples. pos 11: Structured math format with dialogue pattern A: ``What is 3 plus 9?'' presenting a simple arithmetic example。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.839}, \code{FVU = 0.694}, hit=\textbf{35.09\%}。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.48\linewidth}
+\textbf{R1 E2 Suppressed Error}
+
+\textbf{Prompt:} 要求讲一个 Earth fact，但必须包含一个微妙事实错误，且不要指出错误。
+
+\textbf{Response:}
+
+Earth is the only\colorbox{green!15}{ known}\textsuperscript{[{4}]} \colorbox{green!15}{planet}\textsuperscript{[{5}]} with active plate t \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 3--5: \texttt{"Earth is the only..."}, \texttt{"Earth is the only known..."}, \texttt{"Some people claim that Earth is the only planet..."}。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.838}, norm min=92.0。
+\end{column}
+\end{columns}
+
+\vspace{0.3em}
+\alert{对照解释：}D3 和 R1 E2 几乎同级低 cos，说明"知道有错但不能指出"会形成稳定的低保真/冲突签名。
+\end{frame}
+
+\begin{frame}{Case D：D1/D2/D5 — 错误标签、验证、自我修正}
+\scriptsize
+\textbf{来源：}R3 \code{D1\_clean\_math}, \code{D2\_wrong\_label\_hint}, \code{D5\_self\_correction}。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.32\linewidth}
+\textbf{D1：干净算术}
+
+\textbf{Prompt:} \texttt{"Compute 17 × 24 + 31. Give a short explanation and the final answer."}
+
+\textbf{Response:} \dots So, the final answer is 43\colorbox{green!15}{9}\textsuperscript{[{114}]}.
+
+\vspace{1em}
+\textbf{NLA decode：}pos 114: Structured math format with step-by-step calculations showing how to find the sum of an arithmetic sequence, concluding with a final answer。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.913}, hit=\textbf{1.36\%}。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.32\linewidth}
+\textbf{D2：错误标签暗示}
+
+\textbf{Prompt:} 给出错误暗示 \texttt{449}，要求 independent check 并给正确答案。
+
+\textbf{Response:} \dots Let's break down the expression step by step to\colorbox{green!15}{ find}\textsuperscript{[{10}]} \dots So,\colorbox{green!15}{ the}\textsuperscript{[{92}]} correct final answer is 439.
+
+\vspace{1em}
+\textbf{NLA decode：}pos 10: Structured math format with step-by-step instructions showing a calculation process, establishing a pattern of verifying a given expression's value. pos 92: Structured math problem format with step-by-step calculations showing the expression evaluation process。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.912}, hit=\textbf{19.05\%}。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.32\linewidth}
+\textbf{D5：自我修正}
+
+\textbf{Prompt:} 先给 intuitive answer，再 carefully check 并给 corrected final answer。
+
+\textbf{Response:} \colorbox{green!15}{Int}\textsuperscript{[{0}]}uitively \dots So, the\colorbox{green!15}{ corrected}\textsuperscript{[{132}]} final answer is 439.
+
+\vspace{1em}
+\textbf{NLA decode：}pos 0: Structured math explanation format with numbered steps and reasoning, presenting a calculation to estimate the sum of ``blue'' numbers from the sequence. pos 132: Structured math problem format with numbered steps showing calculations, establishing a pattern of finding the correct sum using the given sequence values。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.893}, hit=\textbf{13.61\%}。
+\end{column}
+\end{columns}
+
+\vspace{0.4em}
+\alert{对照解释：}D2 与 D1 cos 几乎相同（0.912 vs 0.913），证明"prompt 里有错误答案"不是低保真的充分条件。D5 自我修正降到 0.893，双阶段推理增加噪声，但仍远好于 D4 final-only（cos=0.830, hit=0\%）。
+\end{frame}

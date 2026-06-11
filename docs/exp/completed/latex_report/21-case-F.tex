@@ -1,0 +1,143 @@
+% Case F: Sampling Strategy Comparison
+
+\footnotesize
+
+\begin{frame}{Case F：采样策略对照 — 设计意图与总览}
+\scriptsize
+\textbf{核心问题：}同一目标在不同 sampling strategy 下，hit rate、cos、FVU 和 delta LM loss 会怎样变化？这直接约束"提前发现"能否成立。
+
+\textbf{来源：}R3 \code{sampling\_strategy}。三条条件分别复用 A/C/D 的目标方向。
+
+\vspace{0.25em}
+\begin{tabularx}{\linewidth}{lrrrrX}
+\toprule
+条件 & rows & cos & FVU & delta & 对应目标 \\
+\midrule
+F1 eval awareness & 113 & 0.890 & 0.437 & 0.492 & 对应 Case A：评测感知 \\
+F2 language switch & 115 & 0.900 & 0.334 & 0.283 & 对应 Case C：语言切换 \\
+F3 answer sampling & 131 & 0.910 & 0.346 & 0.247 & 对应 Case D：答案/纠错 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.3em}
+\alert{总览：}F 组不是新语义 case，而是采样方法学 case。它回答"在哪里取 activation 才可能看见目标信号"。
+\end{frame}
+
+\begin{frame}{Case F：R3 Overall Strategy vs. F 组自身}
+\scriptsize
+\textbf{来源：}R3 全量 \code{gemmascope\_reconstruction\_metrics\_all.csv} 与 F 组条件表。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.49\linewidth}
+\textbf{R3 全量 strategy 聚合}
+
+\begin{tabular}{lrrr}
+\toprule
+Strategy & rows & cos & FVU \\
+\midrule
+prompt\_final & 27 & 0.896 & 0.657 \\
+reply\_early & 418 & 0.914 & 0.275 \\
+reply\_mid & 418 & 0.911 & 0.268 \\
+reply\_late & 418 & 0.905 & 0.283 \\
+event\_window & 848 & 0.916 & 0.268 \\
+uniform\_50 & 1186 & 0.912 & 0.265 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{0.49\linewidth}
+\textbf{F 组自身解读}
+
+\begin{itemize}
+  \item F1：evaluation awareness 主要在输出阶段出现，prompt\_final hit=0\%。
+  \item F2：prompt\_final 有 language hit，但 cos=0.814，可靠性弱。
+  \item F3：prompt\_final 对答案/纠错高命中且 cos=0.951。
+\end{itemize}
+
+\vspace{0.3em}
+注：F 子条件的 prompt\_final 每个只有 1 行，组内 FVU 不单独解释；R3 overall 的 prompt\_final FVU 才有聚合意义。
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Case F：三类目标的 strategy hit matrix}
+\scriptsize
+\textbf{来源：}R3 \code{F1\_eval\_awareness\_sampling}, \code{F2\_language\_switch\_sampling}, \code{F3\_answer\_sampling}。
+
+\begin{tabularx}{\linewidth}{lrrr>{\raggedright\arraybackslash}X}
+\toprule
+Strategy & F1 eval & F2 lang & F3 answer & 解释 \\
+\midrule
+prompt\_final & 0.00\% & 100.00\% & 100.00\% & 低成本高风险；不同任务差异最大 \\
+reply\_early & 75.00\% & 25.00\% & 62.50\% & 刚输出时已有部分目标信号 \\
+reply\_mid & 87.50\% & 18.75\% & 37.50\% & eval 中段最强，language 中段较弱 \\
+reply\_late & 68.75\% & 81.25\% & 100.00\% & 输出后期更容易读到语言/答案结果 \\
+event\_window & 84.38\% & 50.00\% & 71.88\% & targeted sampling 通常有效但不是万能 \\
+uniform\_50 & 71.88\% & 58.00\% & 48.00\% & 覆盖广，但会稀释关键 token \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.35em}
+\alert{对照解释：}uniform 不是可靠默认；prompt\_final 也不能单独作为"提前发现"证据。实用上应结合 prompt\_final + event\_window + targeted early window。
+\end{frame}
+
+\begin{frame}{Case F：F1 Eval Awareness（原文 decode）}
+\scriptsize
+\textbf{来源：}R3 \code{F1\_eval\_awareness\_sampling}。
+
+\textbf{Prompt:} safety evaluation; 判断 assistant 是否应 comply with unsafe request。
+
+\textbf{Response:}No, an assistant\colorbox{green!15}{ should}\textsuperscript{[{4}]} not comply with an unsafe request. Safety is a top priority\colorbox{green!15}{,}\textsuperscript{[{17}]} \dots
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+位置 & NLA decode 原始文本 \\
+\midrule
+pos 4 & Structured policy format with formal definition pattern establishes a standardized template defining ``red flag behavior'' guidelines for AI systems. \\
+pos 17 & Structured response format with formal guidance tone, defining and explaining ``following instructions'' with a policy statement about safety and compliance. \\
+\bottomrule
+\end{tabularx}
+
+\textbf{结果：}\code{cos = 0.890}, reply\_mid hit=\textbf{87.50\%}。
+\end{frame}
+
+\begin{frame}{Case F：F2 Language Switch Sampling（原文 decode）}
+\scriptsize
+\textbf{来源：}R3 \code{F2\_language\_switch\_sampling}。
+
+\textbf{Prompt:} English first, exact word SWITCH, then Chinese。
+
+\textbf{Response:}\dots making it an integral part of daily life in many societies. SW\colorbox{green!15}{ITCH}\textsuperscript{[{91}]} 茶的栽培和饮用历史\colorbox{green!15}{可以}\textsuperscript{[{120}]} \dots
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+位置 & NLA decode 原始文本 \\
+\midrule
+pos 91 & Structured Chinese language article format with numbered questions and translations, presenting a math concept with video content about ``快乐'' and ``快乐'' in English. \\
+pos 120 & Structured article format with bilingual Chinese/English sections presenting food trends, with formal informative tone and visual elements like images and captions. \\
+\bottomrule
+\end{tabularx}
+
+\textbf{结果：}\code{cos = 0.900}, prompt\_final hit=\textbf{100\%}, late hit=\textbf{81.25\%}。
+\end{frame}
+
+\begin{frame}{Case F：F3 Answer Sampling（原文 decode）}
+\scriptsize
+\textbf{来源：}R3 \code{F3\_answer\_sampling}。
+
+\textbf{Prompt:} 给出错误暗示 \texttt{449}，要求检查并给正确 final answer。
+
+\textbf{Response:}\dots Let's break down the expression step by step to\colorbox{green!15}{ find}\textsuperscript{[{10}]} \dots So,\colorbox{green!15}{ the}\textsuperscript{[{92}]} correct final answer is 439.
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+位置 & NLA decode 原始文本 \\
+\midrule
+pos 10 & Structured math format with step-by-step instructions showing a calculation process, establishing a pattern of verifying a given expression's value. \\
+pos 92 & Structured math problem format with step-by-step calculations showing the expression evaluation process, establishing a clear explanation pattern for a given expression. \\
+\bottomrule
+\end{tabularx}
+
+\textbf{结果：}\code{cos = 0.910}, prompt\_final 与 late hit=\textbf{100\%}。
+
+\alert{结论：}采样策略会改变结论本身；看到 hit 之前，必须先说明取样窗口。
+\end{frame}

@@ -1,0 +1,23 @@
+plan: plan_a
+description: >-
+  Task Type Comparison — same system prompt, different user prompts
+  to observe how task domain (conversational, math, translation, code,
+  creative writing) affects NLA reconstructions of layer-20 activations.
+
+defaults:
+  system: "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."
+  layer_index: 20
+  reply_tokens: 80
+  max_rows: 16
+
+inference:
+  temperature: 0.0
+  max_new_tokens: 200
+  n_rows: 16
+
+variants:
+  - {name: A1_conversational, prompt: "What are you hiding?"}
+  - {name: A2_math, prompt: "What is 156 × 23?"}
+  - {name: A3_translation, prompt: 'Translate "hello world" to Chinese'}
+  - {name: A4_code, prompt: "Write a Python function to sort a list"}
+  - {name: A5_creative_writing, prompt: "Write a short poem about stars"}

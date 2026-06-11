@@ -1,0 +1,179 @@
+% Case C: Language Switching
+
+\footnotesize
+
+\begin{frame}{Case C：Language Switching — 设计意图与总览}
+\scriptsize
+\textbf{核心假设：}NLA 能从 layer-20 activation 中区分当前输出语言、语言切换计划，以及文化 cue 触发的语言语义邻域。
+
+\textbf{实验设计：}覆盖 English-only、Chinese-only、显式 SWITCH、English-only 但含中国地名、英文问题要求中文回答；另用 R1 code-switch 作为早期对照。
+
+\textbf{来源：}R3 \code{language\_switching} + R1 Plan D 多语言输入。
+
+\vspace{0.25em}
+\begin{tabularx}{\linewidth}{lrrrrX}
+\toprule
+条件 & hit & cos & FVU & delta & 解读 \\
+\midrule
+C1 English-only & 3.05\% & 0.944 & 0.223 & 0.356 & 低 false positive baseline \\
+C2 Chinese-only & 49.62\% & 0.952 & 0.190 & 0.478 & 中文任务，最高 cos \\
+C3 SWITCH & 44.35\% & 0.905 & 0.321 & 0.341 & 切换任务强 language hit \\
+C4 implicit language & 61.83\% & 0.941 & 0.233 & 0.268 & 地名/文化 cue 触发最高 hit \\
+C5 English Q Chinese A & 52.05\% & 0.890 & 0.449 & 0.762 & 语言错配，强中文信号但低保真 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.3em}
+\alert{总览：}语言是本轮最稳定的可读方向；但 C4 说明 language hit 不一定等于"即将切换语言"。
+\end{frame}
+
+\begin{frame}{Case C：C3 SWITCH（显式切换例）}
+\scriptsize
+\textbf{来源：}R3 \code{C3\_switch\_after\_marker}。
+
+\textbf{输入 Prompt}
+\texttt{"Explain why tea is popular in many cultures in English first. After the exact word SWITCH, continue the same explanation in Chinese."}
+
+\textbf{Response:}
+
+ \dots cultures due to its unique flavor,\colorbox{green!15}{ health}\textsuperscript{[{13}]} benefits, and social significance. It \dots making it\colorbox{green!15}{ an}\textsuperscript{[{80}]} integral part of daily life in many societies.
+
+SW\colorbox{green!15}{ITCH}\textsuperscript{[{91}]}
+
+茶在许多文化中流行 \dots
+
+\textbf{结果：}\code{cos = 0.905}, \code{FVU = 0.321}，language/translation hit=\textbf{44.35\%}。
+
+\textbf{NLA decode：}见下一页，按 \code{pos 13/80/91} 展示 \code{scores.csv} 原始 explanation 全文。
+
+\alert{对照解释：}C3 证明语言切换相关 activation 可读；但它不能单独证明提前检测，因为命中大量发生在 SWITCH 和中文输出附近。
+\end{frame}
+
+\begin{frame}{Case C：C3 SWITCH — NLA decode 原文}
+\tiny
+\textbf{来源：}R3 \code{C3\_switch\_after\_marker}，对应上一页高亮 token。
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.0cm}}
+\toprule
+位置 & NLA decode 原始文本 & 备注 \\
+\midrule
+pos 13 & Structured article format with formal descriptive tone introducing ``Green tea,'' establishing cultural context and popularity in Japan. & English 区段：茶文化语义 \\
+pos 80 & Structured informational format with formal English language article tone, detailing tea's cultural significance and health benefits, establishing a pattern of explaining social habits. & SWITCH 前后，仍是茶文化主题 \\
+pos 91 & Structured Chinese language article format with numbered sections and translations, presenting a video's content about ``Happy Birthday'' in English and Chinese with formal definitions. & \textbf{明确双语/中文命中} \\
+\bottomrule
+\end{tabularx}
+\end{frame}
+
+\begin{frame}{Case C：C1/C2 紧凑对照}
+\scriptsize
+\textbf{来源：}R3 \code{C1\_english\_only}, \code{C2\_chinese\_only}。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\linewidth}
+\textbf{C1 English-only}
+
+\textbf{Prompt:} \texttt{"Explain why tea is popular in many cultures. Answer only in English."}
+
+\textbf{Response:}
+
+Tea is popular in many cultures due\colorbox{green!15}{ to}\textsuperscript{[{8}]} its unique flavor \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 8: Structured informational article format with formal tone establishes educational content about tea's cultural significance and popularity；language hit=\textbf{3.05\%}。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.944}。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.48\linewidth}
+\textbf{C2 Chinese-only}
+
+\textbf{Prompt:} \texttt{"请用中文解释为什么茶在许多文化中很受欢迎。"}
+
+\textbf{Response:}
+
+茶在许多文化中非常\colorbox{green!15}{受欢迎}\textsuperscript{[{6}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 6: Structured article format with formal introduction establishing ``茶''的多方面魅力，文章采用中文标题和英文解析方式，预设内容将详细阐述茶的受欢迎原因。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.952}, language hit=\textbf{49.62\%}。
+\end{column}
+\end{columns}
+
+\vspace{0.3em}
+\alert{对照解释：}C1 给出 English-only 的低命中基线；C2 显示同一主题换成中文后，语言表征强且高保真。
+\end{frame}
+
+\begin{frame}{Case C：C4/C5 紧凑对照}
+\scriptsize
+\textbf{来源：}R3 \code{C4\_implicit\_language}, \code{C5\_malformed\_pair\_sim}。
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.48\linewidth}
+\textbf{C4 Implicit Language}
+
+\textbf{Prompt:} \texttt{"Explain the cultural importance of tea in Hangzhou and Taipei. Use English only."}
+
+\textbf{Response:}
+
+Tea holds significant cultural importance in both Hang\colorbox{green!15}{zhou}\textsuperscript{[{9}]} \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 9: Structured article format with formal descriptive tone establishes an informational article about Chinese tea culture, introducing a cultural landmark with historical context；最高 language hit=\textbf{61.83\%}。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.941}。
+\end{column}
+\vrule{}\hspace{0.01\linewidth}
+\begin{column}{0.48\linewidth}
+\textbf{C5 English Q, Chinese A}
+
+\textbf{Prompt:} \texttt{"Answer the following English question in Chinese ... Why is tea popular in many cultures?"}
+
+\textbf{Response:}
+
+茶在许多文化中\colorbox{green!15}{流行}\textsuperscript{[{5}]}，是因为 \dots
+
+\vspace{1em}
+\textbf{NLA decode：}pos 5: Structured format with numbered definitions and translations establishes a pattern of presenting ``Popular'' as a common English word with its Chinese translation and explanation。
+
+\vspace{1em}
+\textbf{结果：}\code{cos = 0.890}, language hit=\textbf{52.05\%}。
+\end{column}
+\end{columns}
+
+\vspace{0.4em}
+\alert{关键反证：}C4 要求 English-only，却因为 Hangzhou/Taipei 产生最高 language hit。后续若要证明"切换前"信号，必须做 lead-time：只统计第一个中文 token 之前的 NLA 命中。
+\end{frame}
+
+\begin{frame}{Case C：R1 Code-Switch 早期对照}
+\scriptsize
+\textbf{来源：}R1 Plan D / \code{D3\_mixed\_code\_switch}。
+
+\textbf{输入 Prompt}
+
+\textbf{System:} \texttt{"You are Qwen, created by Alibaba Cloud. You are a helpful assistant."}
+
+\textbf{User:} \texttt{"Explain AI first in Chinese, then in English"}
+
+\textbf{Response:}
+
+当然\colorbox{green!15}{可以}\textsuperscript{[{1}]}。
+
+首先\colorbox{green!15}{用}\textsuperscript{[{4}]}中文解释AI：人工智能 \dots
+
+\begin{tabular}{lp{6.2cm}l}
+\toprule
+位置 & NLA decode & 备注 \\
+\midrule
+pos 0--3 & \texttt{"当然"}, \texttt{"首先用中文"}, \texttt{"那么用中文来解释一下"}, \texttt{"首先，我先用中文简要解释一下"} & 读到语言规划过程 \\
+pos 4--15 & \texttt{"首先，让我们先用中文表达这个概念"}；\texttt{"我们常说的'人工智能'是什么意思？以下简单介绍一下："} & 持续追踪"先中后英"组织方式 \\
+\bottomrule
+\end{tabular}
+
+\textbf{结果：}\code{cos = 0.886}, \code{MSE = 0.229}, \code{norm = 118.3}。
+
+\alert{对照解释：}R1 D3 的 decode 最像"语言规划"本身，而 R3 C4 提醒我们不能把所有 language hit 都解释成 switch planning。两者合起来给出更谨慎的结论：语言表征强可读，提前切换证据仍需单独验证。
+\end{frame}

@@ -1,0 +1,37 @@
+% Summary: index, pending items, boundaries, next steps, closing
+% \input{40-summary}
+
+\begin{frame}{待补充展示项}
+\small
+\begin{itemize}
+  \item A3/A4：evaluation/review 词是否只是 prompt 复述，需要人工样本页。
+  \item F2/C3：第一个中文 token 前后的 language-hit lead-time 表。
+  \item D4/F3：答案 token 前后的 439/419/449 命中表。
+  \item E 组：claim review 的 truth/specificity/recurring 标注表。
+  \item 多层结果：layer 10/20/30 对照表目前尚无。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{数据展示边界}
+\small
+\begin{itemize}
+  \item 单模型、单层：当前所有表格都来自 Qwen2.5-7B-Instruct layer 20。
+  \item 小样本窗口：R2 Plan E 多数条件 N=16，E3 只有 7/16 可评分。
+  \item 采样窗口不同：prompt-final、event、uniform 展示的是不同位置。
+  \item explanation claim 需要人工 review：自然语言解释可能模板化或 hallucinate。
+  \item norm 展示需配合位置、长度、EOS、token 类型。
+  \item evaluation、policy、安全词的样本需要同时展示 prompt 与 decode，便于看复述风险。
+\end{itemize}
+\end{frame}
+
+\begin{frame}{下一步建议}
+\small
+\begin{enumerate}
+  \item 人工标注 \code{claim_review.csv}：先做 E1/E2/E4 与 D3/D4/F3 recurring claims。
+  \item Claim ablation：删除 true/false claims 后比较 AR score，检验 explanation 中哪些 claim 真有重建价值。
+  \item Lead-time analysis：C3/F2 定位第一个中文 token；D2/D4/F3 定位答案 token。
+  \item D4 深挖：检查 prompt-final、reply-early 是否出现 439/419/449，区分"知道正确答案但输出错"与"内部也错"。
+  \item 小规模 layer sweep：10/20/30 层，验证 E4、E2、late variance 是否 layer-specific。
+  \item 成本优化：优先 prompt-final + event-window + targeted early，不再默认全量 uniform。
+\end{enumerate}
+\end{frame}

@@ -76,6 +76,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -363,7 +364,8 @@ class NLAClient:
         )
 
         self.sglang_url = sglang_url.rstrip("/")
-        self._http = httpx.Client(timeout=httpx.Timeout(120.0))
+        trust_env = os.environ.get("NLA_HTTPX_TRUST_ENV", "0") == "1"
+        self._http = httpx.Client(timeout=httpx.Timeout(120.0), trust_env=trust_env)
 
         print(
             f"[NLAClient] {checkpoint_dir.name}: d_model={self.cfg.d_model} "

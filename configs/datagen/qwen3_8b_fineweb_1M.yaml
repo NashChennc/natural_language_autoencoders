@@ -1,0 +1,45 @@
+# NLA datagen pipeline config — Qwen3-8B over 100k FineWeb docs.
+# ~1M activation vectors total (100k docs x 10 positions/doc).
+# Split 25/25/50 -> 250k AV-SFT / 250k AR-SFT / 500k RL.
+#
+# Run:
+#   source scripts/qwen3_nla_env.sh
+#   python -m nla.datagen.run_pipeline --config configs/datagen/qwen3_8b_fineweb_1M.yaml
+
+model: qwen3_8b
+base_model: /NAS/chennc/shared/models/Qwen/Qwen3-8B
+layer_index: 24
+output_dir: /NAS/chennc/NashChennc/.tmp/nla_qwen3_8b_fineweb_1M
+
+corpus:
+  name: HuggingFaceFW/fineweb
+  config: sample-10BT
+  split: train
+  start: 0
+  length: 100000
+
+stage0:
+  positions_per_doc: 10
+  chunk_size: 256
+  seed: 42
+  multigpu: true
+  extractor_kwargs: {batch_size: 8, max_length: 2048}
+
+stage1:
+  av_sft_frac: 0.25
+  ar_sft_frac: 0.25
+  rl_frac: 0.50
+  seed: 42
+
+stage2:
+  provider_cls: nla.datagen.providers.AnthropicProvider
+  provider_kwargs:
+    model: claude-haiku-4-5-20251001
+    max_tokens: 300
+    concurrency: 400
+  chunk_size: 512
+
+stage3:
+  keep_debug_metadata: true
+
+storage_cls: nla.datagen.storage.LocalStorage
