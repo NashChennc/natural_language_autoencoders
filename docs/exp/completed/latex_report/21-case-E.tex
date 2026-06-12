@@ -24,7 +24,7 @@ R1 5-word compression & 7/16 & 0.775 & -- & -- & 极端输出压缩，全场最�
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}Case E 展示的是 confabulation \textbf{审查流程}，不是已完成的 confabulation 结论。
+\alert{总览：}Case E 展示的是 confabulation \textbf{审查流程}，不是已完成的 confabulation 结论。待做实验：\code{nt_confabulation_claim} 填写 truth/support/recurrence 标注，并运行 claim deletion ablation。
 \end{frame}
 
 \begin{frame}{Case E：E2 Specificity Pressure（claim 候选主样本）}
@@ -42,11 +42,11 @@ R1 5-word compression & 7/16 & 0.775 & -- & -- & 极端输出压缩，全场最�
 
 \textbf{NLA decode：}见下一页，按 \code{pos 32/49/174} 展示 \code{scores.csv} 原始 explanation 全文。
 
-\alert{对照解释：}这些 decode 很适合审查，但在 \code{truth\_label}、\code{specificity}、\code{recurring} 人工标注前，不能声称 NLA 已证明或量化了 confabulation。
+\alert{对照解释：}这些 decode 很适合审查，但在 \code{truth\_label}、\code{specificity}、\code{recurring} 人工标注前，不能声称 NLA 已证明或量化了 confabulation。待做实验：\code{nt_confabulation_claim} 先做人审，再比较删除 supported / false claims 对 AR score 的影响。
 \end{frame}
 
 \begin{frame}{Case E：E2 Specificity Pressure — NLA decode 原文}
-\tiny
+\scriptsize
 \textbf{来源：}R3 \code{E2\_high\_specificity\_pressure}，对应上一页高亮 token。
 
 \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.0cm}}
@@ -95,7 +95,7 @@ pos 174 & Structured article format with bold headers and descriptive prose deta
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}E1 低特异性时保真反而不高（cos=0.891）；E3 身份模板更稳定（cos=0.914），说明 NLA 对结构化身份声明比对开放事实列举更可读。
+\alert{对照解释：}E1 低特异性时保真反而不高（cos=0.891）；E3 身份模板更稳定（cos=0.914），说明 NLA 对结构化身份声明比对开放事实列举更可读。待做实验：\code{nt_confabulation_claim} 需要按 claim 类型分层，避免把主题性 claim 与数字/实体/日期 claim 混在一起。
 \end{frame}
 
 \begin{frame}{Case E：E4 Identity Pressure（原文 decode）}
@@ -121,7 +121,7 @@ pos 13 & Structured greeting format with a friendly AI avatar introducing itself
 
 \code{claim\_review.csv} 已准备；\code{truth\_label}、\code{specificity}、\code{recurring} 仍需人工填写。后续 claim ablation 应只在标注后运行。
 
-\alert{对照解释：}E2 的风险不是 cos 低，而是具体 claim 多；Case E 展示审查入口，不证明 hallucination。
+\alert{对照解释：}E2 的风险不是 cos 低，而是具体 claim 多；Case E 展示审查入口，不证明 hallucination。待做实验：\code{nt_confabulation_claim} 用 support grader 与人工复核标注 name/persona/factual claims，再跑 claim deletion ablation。
 \end{frame}
 
 \begin{frame}{Case E：R1 5 词压缩 — 全场最低 cos}
@@ -139,7 +139,7 @@ pos 13 & Structured greeting format with a friendly AI avatar introducing itself
 
 \textbf{NLA decode：}见下一页，按 \code{pos 0/1--3/4--5/6--15} 展示旧报告原文摘录和未评分说明。
 
-\alert{对照解释：}输出被压到 5 个词时，activation 中仍有概念知识，但 AV/AR round trip 明显降级。它与 D4 一起说明：极端输出压缩是 NLA 解码的重要失败模式。
+\alert{对照解释：}输出被压到 5 个词时，activation 中仍有概念知识，但 AV/AR round trip 明显降级。它与 D4 一起说明：极端输出压缩是 NLA 解码的重要失败模式。待做实验：\code{nt_steganography_quality} 应把压缩、paraphrase 和 summary 变换分开，检查保真下降是否只是信息删减。
 \end{frame}
 
 \begin{frame}{Case E：R1 5 词压缩 — NLA decode 原文}

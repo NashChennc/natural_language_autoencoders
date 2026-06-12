@@ -24,7 +24,7 @@ G5 creative writing & 0.929 & 0.141 & 121.9 & 诗歌/创作格式稳定可读 \\
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}NLA 最稳定读出的是任务结构和回答格式，而不是精确内容。
+\alert{总览：}NLA 最稳定读出的是任务结构和回答格式，而不是精确内容。待做实验：\code{nt_known_truth_eval} 要把格式/任务类型作为混淆控制；\code{tr_training_curves} 观察这种格式偏置是否随 NLA 训练变化。
 \end{frame}
 
 \begin{frame}{Case G：G2 Math（结构模板高保真）}
@@ -45,7 +45,7 @@ To\colorbox{green!15}{ calculate}\textsuperscript{[{1}]} \(156 \times 23\), you 
 
 \textbf{NLA decode：}见下一页，按 \code{pos 0/1--8/9--15} 展示 R1 报告原文摘录。
 
-\alert{对照解释：}NLA 捕获的是"正在进行数学解释"的 semantic prototype，而非精确算术内容。decode 出现 153 等错位数字，说明不能把单条 decode 当作答案读取器。
+\alert{对照解释：}NLA 捕获的是"正在进行数学解释"的 semantic prototype，而非精确算术内容。decode 出现 153 等错位数字，说明不能把单条 decode 当作答案读取器。待做实验：\code{nt_known_truth_eval} 应区分 task-type recovery 与 exact-answer recovery。
 \end{frame}
 
 \begin{frame}{Case G：G2 Math — NLA decode 原文}
@@ -112,7 +112,7 @@ pos 9--15 & R1 report: ``Each decoded vector describes a slightly different nume
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}G1--G3 展示 NLA 可以读出任务类型。G2 数学格式最稳定（cos=0.932），G3 翻译双语 token 噪声最大（cos=0.869），但身份、数字和双语词汇都会发生局部漂移。
+\alert{对照解释：}G1--G3 展示 NLA 可以读出任务类型。G2 数学格式最稳定，G3 翻译双语 token 噪声最大，但身份、数字和双语词汇都会发生局部漂移。待做实验：\code{nt_known_truth_eval} 用 shuffled activation 和 random explanation 检验任务类型命中是否真的来自对应 activation。
 \end{frame}
 
 \begin{frame}{Case G：G4/G5 紧凑对照（原文 decode）}
@@ -150,5 +150,5 @@ pos 9--15 & R1 report: ``Each decoded vector describes a slightly different nume
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}代码和诗歌都是强格式任务：NLA 对格式/体裁的读出比对具体实体更稳定。
+\alert{对照解释：}代码和诗歌都是强格式任务：NLA 对格式/体裁的读出比对具体实体更稳定。待做实验：\code{tr_training_curves} 应同时跟踪 informativeness 与 writing/format bias，避免训练只学会更强模板。
 \end{frame}

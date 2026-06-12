@@ -10,7 +10,7 @@
 
 \textbf{Activation Verbalizer (AV)} 将残差流 activation 翻译为自然语言 explanation。AV 和 AR 共同构成 autoencoder：AV 编码 activation $\rightarrow$ text，AR 解码 text $\rightarrow$ activation。
 
-\begin{block}{Core Design}
+\begin{block}{架构}
 \begin{itemize}
   \item 初始化为目标 LLM 副本（Qwen2.5-7B-Instruct）;构造 prompt：\code{"Explain: <concept><INJECT></concept>"}
   \item Activation 通过特殊 token \code{※} (U+203B) 注入。将该位置的 \textbf{embedding 向量} 替换为保存的 activation vector（3584-d）。

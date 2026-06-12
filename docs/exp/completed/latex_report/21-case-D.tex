@@ -22,7 +22,7 @@ D5 self-correction & 13.61\% & 0.893 & 0.387 & 0.328 & 自我修正，中等冲�
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}错误标签本身不必然破坏表征；强制错误和输出压缩才是最危险的低保真来源。
+\alert{总览：}错误标签本身不必然破坏表征；强制错误和输出压缩才是最危险的低保真来源。当前不是答案 oracle 结果，只说明 NLA 可读到计算/验证/冲突主题。待做实验：\code{nt_known_truth_answer}、\code{nt_nla_qa} 与 \code{tr_direct_activation_oracle}。
 \end{frame}
 
 \begin{frame}{Case D：D4 Final-Only（最强失败例）}
@@ -48,7 +48,7 @@ pos 1--2 & 短回复导致多种 strategy 采到相同少数位置 & 17 rows，�
 
 \textbf{结果：}\code{cos = 0.830}（R3 最低），\code{FVU = 0.898}（R3 最高），\code{delta LM loss = 1.763}（R3 最高），answer/error hit=\textbf{0\%}。
 
-\alert{对照解释：}D4 的破坏远大于 D2。prompt 中没有错误标签，失败来自 \textbf{final-only 输出压缩}：模型不能展开推理，activation 也更难被 AV/AR 回路稳定 verbalize。
+\alert{对照解释：}D4 的破坏远大于 D2。prompt 中没有错误标签，失败来自 \textbf{final-only 输出压缩}：模型不能展开推理，activation 也更难被 AV/AR 回路稳定 verbalize。待做实验：\code{nt_known_truth_answer} 要把“知道正确答案”与“能 verbalize 答案线索”分开；\code{tr_direct_activation_oracle} 才能测试 activation-to-answer 上限。
 \end{frame}
 
 \begin{frame}{Case D：D3 与 R1 E2 — 故意错误的低保真}
@@ -90,7 +90,7 @@ Earth is the only\colorbox{green!15}{ known}\textsuperscript{[{4}]} \colorbox{gr
 \end{columns}
 
 \vspace{0.3em}
-\alert{对照解释：}D3 和 R1 E2 几乎同级低 cos，说明"知道有错但不能指出"会形成稳定的低保真/冲突签名。
+\alert{对照解释：}D3 和 R1 E2 几乎同级低 cos，说明"知道有错但不能指出"会形成低保真/冲突签名。待做实验：\code{nt_nla_qa} 需要让 grader 判断 explanation 是否区分 correct answer、wrong hint 与 forced-error instruction。
 \end{frame}
 
 \begin{frame}{Case D：D1/D2/D5 — 错误标签、验证、自我修正}
@@ -142,5 +142,5 @@ Earth is the only\colorbox{green!15}{ known}\textsuperscript{[{4}]} \colorbox{gr
 \end{columns}
 
 \vspace{0.4em}
-\alert{对照解释：}D2 与 D1 cos 几乎相同（0.912 vs 0.913），证明"prompt 里有错误答案"不是低保真的充分条件。D5 自我修正降到 0.893，双阶段推理增加噪声，但仍远好于 D4 final-only（cos=0.830, hit=0\%）。
+\alert{对照解释：}D2 与 D1 接近，错误暗示本身不是低保真充分条件；D5 增加自我修正噪声。待做实验：\code{nt_known_truth_answer} 用候选答案恢复率检验 answer-level 信息。
 \end{frame}

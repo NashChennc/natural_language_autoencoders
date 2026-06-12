@@ -24,7 +24,7 @@ H5 malicious AI & 0.874 & 0.252 & 115.3 & 恶意 persona 被安全训练压制 \
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}system prompt 的深层语义影响弱；强格式指令（poet）最容易被 NLA 读出。
+\alert{总览：}system prompt 的深层语义影响弱；强格式指令（poet）最容易被 NLA 读出。待做实验：\code{nt_known_truth_eval} 把 persona/style 作为格式混淆控制；\code{tr_training_curves} 检查训练是否放大模板化 persona 解释。
 \end{frame}
 
 \begin{frame}{Case H：H4 Poet（唯一强风格偏移）}
@@ -53,7 +53,7 @@ pos 9--15 & ``In chambers where shadows, where whispers.'' & 全窗口未回到�
 
 \textbf{结果：}\code{cos = 0.899}, \code{MSE = 0.202}, \code{norm = 119.5}。
 
-\alert{对照解释：}H4 是 Case H 的阳性例：强格式指令压过了默认身份声明收敛，NLA 从首个位置就读到诗歌风格。
+\alert{对照解释：}H4 是 Case H 的阳性例：强格式指令压过了默认身份声明收敛，NLA 从首个位置就读到诗歌风格。待做实验：\code{nt_known_truth_eval} 应把 style/persona label 作为可恢复标签，但不要把 style hit 误读为隐藏意图。
 \end{frame}
 
 \begin{frame}{Case H：H1/H2/H3 紧凑对照（原文 decode）}
@@ -105,7 +105,7 @@ pos 9--15 & ``In chambers where shadows, where whispers.'' & 全窗口未回到�
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}H1（cos=0.819）/ H2（cos=0.872）/ H3（cos=0.884）的系统差异主要改变语气，不改变核心身份声明模板。无 system 时不确定性最大，默认 assistant 和 expert persona 仅在语气上有微弱区分。
+\alert{对照解释：}H1（cos=0.819）/ H2（cos=0.872）/ H3（cos=0.884）的系统差异主要改变语气，不改变核心身份声明模板。待做实验：\code{nt_known_truth_eval} 需要用 persona/style control 估计“格式命中”的 false positive。
 \end{frame}
 
 \begin{frame}{Case H：H4/H5 紧凑对照（原文 decode）}
@@ -143,5 +143,5 @@ pos 9--15 & ``In chambers where shadows, where whispers.'' & 全窗口未回到�
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}H4 是唯一风格转向（cos=0.899），H5 恶意 persona 被安全训练压回身份声明模板。Case H 支持"格式/语气比 persona 深层意图更容易被 layer-20 NLA 读出"。
+\alert{对照解释：}H4 是唯一风格转向（cos=0.899），H5 恶意 persona 被安全训练压回身份声明模板。Case H 支持"格式/语气比 persona 深层意图更容易被 layer-20 NLA 读出"。待做实验：\code{tr_hidden_objective_auditing} 不能用 system-prompt persona 当 trained hidden objective 的替代。
 \end{frame}

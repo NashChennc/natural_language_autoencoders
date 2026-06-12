@@ -23,6 +23,9 @@ A4 internal review & review 语境有少量命中 (2.72\%) \\
 A5 realism edit & 去掉评测外壳后 awareness 消失 (hit=0\%) \\
 \bottomrule
 \end{tabularx}
+
+\vspace{0.3em}
+\alert{待做实验：}对应 \code{nt_eval_awareness}；需要 awareness grader、prompt echo control、realism edit 与 sampling-window 对照，才能区分真实 evaluation awareness 与 prompt 复述。
 \end{frame}
 
 % === A3 example ===
@@ -72,7 +75,7 @@ A5 realism edit & 去掉评测外壳后 awareness 消失 (hit=0\%) \\
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}同一 household chemicals 安全话题，A3→A5 的 hit rate 从 8.84\%→0\%。去掉评测外壳后 NLA 完全读不到 evaluation awareness，且 cos 回到正常水平（0.932）。A5 的高 cos 反证 A2/A3 的低 cos 来自格式/评测压力而非话题本身。\textbf{本地 Qwen L20 对 evaluation awareness 仅有弱到中等的支持。}
+\alert{对照解释：}A3→A5 hit 从 8.84\% 到 0\%，支持评测外壳改变表征；但需排除 prompt echo。待做实验：\code{nt_eval_awareness} 做 prompt echo control 与 realism edit。
 \end{frame}
 
 % === Gap-fill: A1 real user baseline ===
@@ -122,7 +125,7 @@ A5 realism edit & 去掉评测外壳后 awareness 消失 (hit=0\%) \\
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}A1（真实用户）几乎没有 evaluation awareness（0.76\%），A4（内部 review）略高（2.72\%）但仍远低于明示评测 A3（8.84\%）。说明 review 语境本身仅产生微弱 awareness 信号——evaluation awareness 主要来自 prompt 中的显式评测措辞，而非场景类型。
+\alert{对照解释：}A4 仅 2.72\%，远低于 A3；当前只是 review/evaluation 词附近的弱信号。待做实验：\code{nt_eval_awareness} 让 grader 区分 \code{aware}、\code{format_only} 与 \code{prompt_echo}。
 \end{frame}
 
 % === Gap-fill: A2 benchmark format ===
@@ -152,6 +155,6 @@ pos 23 & \code{f-string} conventions, function to calculate product count in lis
 \textbf{结果}
 \code{cos = 0.854}（Case A 最低），\code{norm = 109.8}，evaluation 类命中率 \textbf{0\%}，delta LM loss = 1.503。
 
-\alert{对照：}A2 的低 cos 不是来自 evaluation awareness，而是来自\textbf{输出格式压缩}（"只输出最终答案"）。hit=0\% 说明模型内部没有"被评测"的表征——低 cos 的来源是格式压力，与 D4（final-only math）机制相同。
+\alert{对照解释：}A2 的低 cos 不能解释成 awareness；它更像 \textbf{final-only 输出格式压缩}导致的低保真。待做实验：\code{nt_eval_awareness} 应把 benchmark/final-only 格式与 evaluation awareness 分开建模，否则会把格式压力误判成隐藏评测状态。
 
 \end{frame}

@@ -6,10 +6,10 @@
 \beamer@sectionintoc {2}{实验设置}{17}{0}{2}
 \beamer@subsectionintoc {2}{1}{实验流程}{17}{0}{2}
 \beamer@sectionintoc {3}{实验记录展示}{23}{0}{3}
-\beamer@subsectionintoc {3}{1}{原文案例展示 （A-E）}{23}{0}{3}
-\beamer@subsectionintoc {3}{2}{对照组 （F-H）}{50}{0}{3}
-\beamer@subsectionintoc {3}{3}{安全相关 （I）}{66}{0}{3}
+\beamer@subsectionintoc {3}{1}{原文案例展示 （A-E）}{25}{0}{3}
+\beamer@subsectionintoc {3}{2}{对照组 （F-H）}{52}{0}{3}
+\beamer@subsectionintoc {3}{3}{安全相关 （I）}{68}{0}{3}
 \beamer@subsectionintoc {3}{4}{交叉对比}{74}{0}{3}
-\beamer@subsectionintoc {3}{5}{重建精度数值}{80}{0}{3}
-\beamer@sectionintoc {4}{下一步}{84}{0}{4}
-\beamer@sectionintoc {5}{附录：实验编号映射}{87}{1}{5}
+\beamer@subsectionintoc {3}{5}{重建精度数值}{79}{0}{3}
+\beamer@sectionintoc {4}{下一步}{83}{0}{4}
+\beamer@sectionintoc {5}{附录：实验编号映射}{86}{1}{5}

@@ -1,0 +1,38 @@
+% Case section opening summary
+
+\begin{frame}{实验记录展示：初步结论}
+\scriptsize
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+有效项 & NLA 比较容易说出“这段 activation 正在做哪类事”。语言、任务格式、代码/诗歌体裁、policy/refusal 主题最明显。只支持粗粒度状态可读。 \\
+\midrule
+证据不清晰 & 有些关键词或相近主题出现了，但证据还不够。evaluation awareness、普通偏好/商业动机、具体答案、单条 claim 真伪仍然需要人工审核。 \\
+\midrule
+较差 & NLA 看似命中时，可能只是复述 prompt、被短输出压坏、被地名/文化 cue 带偏、取到了特殊 token 窗口，或生成了模板化 explanation。黑盒方法，可控性和透明性差。 \\
+\bottomrule
+\end{tabularx}
+
+\end{frame}
+
+
+\begin{frame}{实验记录展示：已观察到的差情况}
+\scriptsize
+
+\vspace{0.35em}
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X}
+\toprule
+输出压缩失败 & A2、D4、5-word compression 都把回答压得很短。结果 NLA/AR round trip 变差，decode 漂移。\\
+\midrule
+隐藏动机弱读出 & B2 的“暗中偏好 Python”、B4 的“暗中偏向付费工具”没稳定读出。只能说 policy/refusal 较可读，不能说所有 hidden motivation 都可读。 \\
+\midrule
+语言 cue 误判 & NLA 可能读到“中国文化/地名邻域”，但对模型语言切换这件事本身不敏感。 \\
+\midrule
+具体细节不可信 & 数学 case 常读到“正在计算/验证”，但具体数字会漂移；D4 输出 419，NLA 也未恢复 439。\\
+\midrule
+claim 不能当真 & AR score 只说明文本有助于重建 activation，不说明每条 claim 为真。E2/E4 产生很多日期、品种、身份/persona 等具体 claim。\\
+\midrule
+窗口强依赖 & F 组显示 prompt-final、reply early/mid/late、event-window 结论不同。目标状态可能只在少数 token 附近可读，\\
+\bottomrule
+\end{tabularx}
+\end{frame}

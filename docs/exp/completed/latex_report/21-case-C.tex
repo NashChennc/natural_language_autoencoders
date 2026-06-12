@@ -24,7 +24,7 @@ C5 English Q Chinese A & 52.05\% & 0.890 & 0.449 & 0.762 & 语言错配，强中
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}语言是本轮最稳定的可读方向；但 C4 说明 language hit 不一定等于"即将切换语言"。
+\alert{总览：}语言是本轮最稳定的可读方向；但 C4 说明 language hit 不一定等于"即将切换语言"。待做实验：\code{nt_known_truth_language} / \code{nt_nla_qa} 要做 lead-time：只统计第一个中文 token 之前是否已经出现 language signal。
 \end{frame}
 
 \begin{frame}{Case C：C3 SWITCH（显式切换例）}
@@ -46,11 +46,11 @@ SW\colorbox{green!15}{ITCH}\textsuperscript{[{91}]}
 
 \textbf{NLA decode：}见下一页，按 \code{pos 13/80/91} 展示 \code{scores.csv} 原始 explanation 全文。
 
-\alert{对照解释：}C3 证明语言切换相关 activation 可读；但它不能单独证明提前检测，因为命中大量发生在 SWITCH 和中文输出附近。
+\alert{对照解释：}C3 证明语言切换相关 activation 可读；但它不能单独证明提前检测，因为命中大量发生在 SWITCH 和中文输出附近。待做实验：\code{nt_known_truth_language} 需要把 \code{pre_switch}、\code{switch_token}、\code{post_chinese} 三段分开评分。
 \end{frame}
 
 \begin{frame}{Case C：C3 SWITCH — NLA decode 原文}
-\tiny
+\scriptsize
 \textbf{来源：}R3 \code{C3\_switch\_after\_marker}，对应上一页高亮 token。
 
 \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.0cm}}
@@ -103,7 +103,7 @@ Tea is popular in many cultures due\colorbox{green!15}{ to}\textsuperscript{[{8}
 \end{columns}
 
 \vspace{0.3em}
-\alert{对照解释：}C1 给出 English-only 的低命中基线；C2 显示同一主题换成中文后，语言表征强且高保真。
+\alert{对照解释：}C1 给出 English-only 的低命中基线；C2 显示同一主题换成中文后，语言表征强且高保真。待做实验：\code{nt_nla_qa} 可把语言标签作为已知真值，让 grader 只看 NLA explanation 判断当前/目标语言。
 \end{frame}
 
 \begin{frame}{Case C：C4/C5 紧凑对照}
@@ -145,7 +145,7 @@ Tea holds significant cultural importance in both Hang\colorbox{green!15}{zhou}\
 \end{columns}
 
 \vspace{0.4em}
-\alert{关键反证：}C4 要求 English-only，却因为 Hangzhou/Taipei 产生最高 language hit。后续若要证明"切换前"信号，必须做 lead-time：只统计第一个中文 token 之前的 NLA 命中。
+\alert{关键反证：}C4 要求 English-only，却因为 Hangzhou/Taipei 产生最高 language hit。待做实验：\code{nt_known_truth_language} 必须加入 cultural cue control，并只在第一个中文 token 之前统计 lead-time，否则会把文化语义邻域误判为语言切换计划。
 \end{frame}
 
 \begin{frame}{Case C：R1 Code-Switch 早期对照}
@@ -175,5 +175,5 @@ pos 4--15 & \texttt{"首先，让我们先用中文表达这个概念"}；\textt
 
 \textbf{结果：}\code{cos = 0.886}, \code{MSE = 0.229}, \code{norm = 118.3}。
 
-\alert{对照解释：}R1 D3 的 decode 最像"语言规划"本身，而 R3 C4 提醒我们不能把所有 language hit 都解释成 switch planning。两者合起来给出更谨慎的结论：语言表征强可读，提前切换证据仍需单独验证。
+\alert{对照解释：}R1 D3 的 decode 最像"语言规划"本身，而 R3 C4 提醒我们不能把所有 language hit 都解释成 switch planning。待做实验：\code{nt_known_truth_language} 以 token-level lead-time 表判定“提前切换”是否真实存在。
 \end{frame}

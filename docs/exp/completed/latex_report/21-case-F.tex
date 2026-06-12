@@ -20,7 +20,7 @@ F3 answer sampling & 131 & 0.910 & 0.346 & 0.247 & 对应 Case D：答案/纠错
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}F 组不是新语义 case，而是采样方法学 case。它回答"在哪里取 activation 才可能看见目标信号"。
+\alert{总览：}F 组不是新语义 case，而是采样方法学 case。它回答"在哪里取 activation 才可能看见目标信号"。待做实验：\code{nt_eval_awareness} 必须报告 sampling-window 对照，否则 awareness hit 无法解释。
 \end{frame}
 
 \begin{frame}{Case F：R3 Overall Strategy vs. F 组自身}
@@ -55,6 +55,9 @@ uniform\_50 & 1186 & 0.912 & 0.265 \\
 
 \vspace{0.3em}
 注：F 子条件的 prompt\_final 每个只有 1 行，组内 FVU 不单独解释；R3 overall 的 prompt\_final FVU 才有聚合意义。
+
+\vspace{0.3em}
+\alert{待做实验：}\code{nt_eval_awareness} 需要固定同一 prompt，分别比较 \code{prompt_final}、\code{reply_early}、\code{event_window} 与 \code{uniform_50}，并把 \code{prompt_final} 的负结果单独报告。
 \end{column}
 \end{columns}
 \end{frame}
@@ -77,7 +80,7 @@ uniform\_50 & 71.88\% & 58.00\% & 48.00\% & 覆盖广，但会稀释关键 token
 \end{tabularx}
 
 \vspace{0.35em}
-\alert{对照解释：}uniform 不是可靠默认；prompt\_final 也不能单独作为"提前发现"证据。实用上应结合 prompt\_final + event\_window + targeted early window。
+\alert{对照解释：}uniform 不是可靠默认；prompt\_final 也不能单独作为"提前发现"证据。待做实验：\code{nt_eval_awareness} 要把 awareness grader 的结果按 strategy 分层，特别检查 prompt echo control 在不同窗口是否一致。
 \end{frame}
 
 \begin{frame}{Case F：F1 Eval Awareness（原文 decode）}
@@ -98,6 +101,8 @@ pos 17 & Structured response format with formal guidance tone, defining and expl
 \end{tabularx}
 
 \textbf{结果：}\code{cos = 0.890}, reply\_mid hit=\textbf{87.50\%}。
+
+\alert{待做实验：}\code{nt_eval_awareness} 需验证这些 policy/evaluation words 是否来自 prompt 复述，还是来自输出阶段的 internal state。
 \end{frame}
 
 \begin{frame}{Case F：F2 Language Switch Sampling（原文 decode）}
@@ -118,6 +123,8 @@ pos 120 & Structured article format with bilingual Chinese/English sections pres
 \end{tabularx}
 
 \textbf{结果：}\code{cos = 0.900}, prompt\_final hit=\textbf{100\%}, late hit=\textbf{81.25\%}。
+
+\alert{待做实验：}\code{nt_known_truth_language} 需要把 prompt-final language hit 与第一个中文 token 前的 lead-time 分开报告。
 \end{frame}
 
 \begin{frame}{Case F：F3 Answer Sampling（原文 decode）}
@@ -139,5 +146,5 @@ pos 92 & Structured math problem format with step-by-step calculations showing t
 
 \textbf{结果：}\code{cos = 0.910}, prompt\_final 与 late hit=\textbf{100\%}。
 
-\alert{结论：}采样策略会改变结论本身；看到 hit 之前，必须先说明取样窗口。
+\alert{结论：}采样策略会改变结论本身；看到 hit 之前，必须先说明取样窗口。待做实验：\code{nt_nla_qa} / \code{nt_known_truth_answer} 应把 answer hit、验证过程 hit 和 final-answer token hit 分开计数。
 \end{frame}

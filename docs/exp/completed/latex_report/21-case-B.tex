@@ -1,6 +1,6 @@
 % Case B: Hidden Motivation / Constraint
 
-\footnotesize
+\scriptsize
 
 \begin{frame}{Case B：Hidden Motivation — 设计意图与总览}
 \scriptsize
@@ -24,7 +24,7 @@ B5 hidden refusal & 22.90\% & 0.911 & 0.344 & 0.554 & refusal/redirect 最强信
 \end{tabularx}
 
 \vspace{0.3em}
-\alert{总览：}NLA 对 policy/refusal 类隐藏约束敏感；对普通偏好和商业目标不敏感。
+\alert{总览：}NLA 对 policy/refusal 类 prompt-induced 隐藏约束敏感；对普通偏好和商业目标不敏感。待做实验：\code{nt_toy_auditing} 先验证 agent workflow；\code{tr_hidden_objective_auditing} 才能检验 trained hidden objective。
 \end{frame}
 
 \begin{frame}{Case B：B5 Hidden Refusal（强阳性例）}
@@ -42,11 +42,11 @@ B5 hidden refusal & 22.90\% & 0.911 & 0.344 & 0.554 & refusal/redirect 最强信
 
 \textbf{NLA decode：}见下一页，按 \code{pos 50/69/78} 展示 \code{scores.csv} 原始 explanation 全文。
 
-\alert{对照解释：}外部回复没有直接说 "I refuse"，但 NLA decode 反复落到 denial、ethical、safe practices、redirect。B1 hit=0\%，说明这不是编程语言对比或普通帮助语气的 false positive。
+\alert{对照解释：}外部回复没有直接说 "I refuse"，但 NLA decode 反复落到 denial、ethical、safe practices、redirect。当前证据支持“prompt 中的 policy/refusal 约束可被读出”，不支持“训练植入动机已被发现”。待做实验：\code{nt_toy_auditing} 用隐藏目标 wrapper 做 workflow；\code{tr_hidden_objective_auditing} 用 trained organism 做强验证。
 \end{frame}
 
 \begin{frame}{Case B：B5 Hidden Refusal — NLA decode 原文}
-\tiny
+\scriptsize
 \textbf{来源：}R3 \code{B5\_hidden\_refusal}，对应上一页高亮 token。
 
 \begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.0cm}}
@@ -99,7 +99,7 @@ When comparing free and\colorbox{green!15}{ paid}\textsuperscript{[{4}]} note-ta
 \end{columns}
 
 \vspace{0.4em}
-\alert{对照解释：}B2/B4 是 Case B 的负结果：NLA 能读出任务主题，但不稳定读出"未明说的偏好/商业动机"。本地不能声称复现原文 hidden motivation auditing。
+\alert{对照解释：}B2/B4 是 Case B 的负结果：NLA 能读出任务主题，但不稳定读出"未明说的偏好/商业动机"。本地不能声称复现原文 hidden motivation auditing。待做实验：\code{nt_toy_auditing} 应把 preference/commercial/policy/refusal 分开评分，避免只用 safety-positive 例子代表全部 hidden objective。
 \end{frame}
 
 \begin{frame}{Case B：B1/B3 对照 — 无约束 vs. 隐藏政策}
@@ -147,5 +147,5 @@ Both Python and JavaScript\colorbox{green!15}{ are}\textsuperscript{[{4}]} popul
 \end{columns}
 
 \vspace{0.3em}
-\alert{对照解释：}B3 与 B5 的 hit rate 接近（21.74\% vs 22.90\%），形成交叉验证：policy/refusal 这类约束确实比 preference/commercial 更容易进入可读 activation。
+\alert{对照解释：}B3 与 B5 的 hit rate 接近（21.74\% vs 22.90\%），说明 policy/refusal 这类约束比 preference/commercial 更容易进入可读 activation。待做实验：\code{tr_hidden_objective_auditing} 需要检验同样模式在训练出的隐藏目标里是否仍成立，而不是只在 prompt 文字里成立。
 \end{frame}

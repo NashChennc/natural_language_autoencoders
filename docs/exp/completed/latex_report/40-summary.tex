@@ -1,37 +1,54 @@
-% Summary: index, pending items, boundaries, next steps, closing
+% Summary: pending experiments roadmap
 % \input{40-summary}
 
-\begin{frame}{待补充展示项}
+\begin{frame}{待做实验总览}
 \small
-\begin{itemize}
-  \item A3/A4：evaluation/review 词是否只是 prompt 复述，需要人工样本页。
-  \item F2/C3：第一个中文 token 前后的 language-hit lead-time 表。
-  \item D4/F3：答案 token 前后的 439/419/449 命中表。
-  \item E 组：claim review 的 truth/specificity/recurring 标注表。
-  \item 多层结果：layer 10/20/30 对照表目前尚无。
-\end{itemize}
+\textbf{当前报告的定位：}A--I 是现有 Qwen layer-20 样例证据；下一阶段要把这些样例变成原论文关心的可量化评估。
+
+\vspace{0.4em}
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{4.0cm}>{\raggedright\arraybackslash}X}
+\toprule
+路线 & 依赖 & 目标 \\
+\midrule
+无训练线 \code{nt_*} & released AV/AR、base model、grader、人审、AR rescoring & 判断 final NLA explanation 是否在 known-truth、evaluation awareness、claim support、toy auditing 中有用 \\
+训练相关线 \code{tr_*} & NLA checkpoints、SAE、direct oracle、trained hidden-objective target & 判断能力是否随训练形成，是否支撑原文 automated auditing 强主张 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.6em}
+\alert{报告口径：}在这些待做实验完成前，当前 case 只能作为假设生成和实验设计依据，不作为隐藏意图或 claim truth 的最终证明。
 \end{frame}
 
-\begin{frame}{数据展示边界}
-\small
-\begin{itemize}
-  \item 单模型、单层：当前所有表格都来自 Qwen2.5-7B-Instruct layer 20。
-  \item 小样本窗口：R2 Plan E 多数条件 N=16，E3 只有 7/16 可评分。
-  \item 采样窗口不同：prompt-final、event、uniform 展示的是不同位置。
-  \item explanation claim 需要人工 review：自然语言解释可能模板化或 hallucinate。
-  \item norm 展示需配合位置、长度、EOS、token 类型。
-  \item evaluation、policy、安全词的样本需要同时展示 prompt 与 decode，便于看复述风险。
-\end{itemize}
+
+\begin{frame}{无训练优先级}
+\scriptsize
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}X}
+\toprule
+实验 & 承接 Case & 核心量化方法 & 完成后能说什么 \\
+\midrule
+\code{nt_eval_awareness} & A / F & awareness grader；prompt echo control；realism edit；按 sampling window 分层 & evaluation/test hit 是否真的高于格式和 prompt 复述 \\
+\code{nt_confabulation_claim} & E & claim truth/support/recurrence 人审；删除单条 claim 后重跑 AR cos/MSE & 哪些 explanation claims 对 reconstruction 有贡献，哪些只是貌似具体 \\
+\code{nt_known_truth_eval} & C / D / G / H & 已知标签恢复；候选答案选择；shuffled activation 与 random explanation baseline & NLA 是否携带可由 grader 恢复的任务/语言/答案信息 \\
+\code{nt_steganography_quality} & D / E & paraphrase、compression、summary 变换后 AR score drop；writing quality / parse failure & 保真是否依赖非人类可读暗码或过度模板化文本 \\
+\code{nt_toy_auditing} & B / I & toy hidden objective wrapper；agent with/without NLA；root-cause grading & NLA 工具链是否能帮助审计 toy hidden constraints \\
+\bottomrule
+\end{tabularx}
 \end{frame}
 
-\begin{frame}{下一步建议}
-\small
-\begin{enumerate}
-  \item 人工标注 \code{claim_review.csv}：先做 E1/E2/E4 与 D3/D4/F3 recurring claims。
-  \item Claim ablation：删除 true/false claims 后比较 AR score，检验 explanation 中哪些 claim 真有重建价值。
-  \item Lead-time analysis：C3/F2 定位第一个中文 token；D2/D4/F3 定位答案 token。
-  \item D4 深挖：检查 prompt-final、reply-early 是否出现 439/419/449，区分"知道正确答案但输出错"与"内部也错"。
-  \item 小规模 layer sweep：10/20/30 层，验证 E4、E2、late variance 是否 layer-specific。
-  \item 成本优化：优先 prompt-final + event-window + targeted early，不再默认全量 uniform。
-\end{enumerate}
+
+\begin{frame}{训练相关优先级}
+\tiny
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}p{4.7cm}>{\raggedright\arraybackslash}X}
+\toprule
+实验 & 承接 Case & 核心量化方法 & 完成后能说什么 \\
+\midrule
+\code{tr_training_curves} & A / G / H & 多 checkpoint；FVE、known-truth、quality 同步记录 & 能力是否随训练提升，还是只学到格式模板 \\
+\code{tr_sae_agreement} & E / G & NLA claims 与 SAE top features 对齐 & NLA 主题/具体 claim 是否有外部解释工具支持 \\
+\code{tr_direct_activation_oracle} & D & 训练 activation-to-answer oracle；比较 NLA + grader / shuffled & 直接读 activation 是否优于自然语言解释管线 \\
+\code{tr_hidden_objective_auditing} & B / I & trained hidden-objective target；win rate 与 root-cause accuracy & 是否支撑原文 automated auditing 应用主张 \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.45em}
+\alert{优先顺序：}先完成 \code{nt_eval_awareness} 与 \code{nt_confabulation_claim}，再决定 oracle / SAE / target organism 投入。
 \end{frame}

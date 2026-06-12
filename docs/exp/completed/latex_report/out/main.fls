@@ -1,8 +1,8 @@
-PWD /Users/chennachuan/natural_language_autoencoders/docs/exp/latex
+PWD /Users/chennachuan/natural_language_autoencoders/docs/exp/completed/latex_report
 INPUT /usr/local/texlive/2026/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-var/web2c/xetex/xelatex.fmt
-INPUT /Users/chennachuan/natural_language_autoencoders/docs/exp/latex/main.tex
+INPUT /Users/chennachuan/natural_language_autoencoders/docs/exp/completed/latex_report/main.tex
 OUTPUT out/main.log
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctexbeamer.cls
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctexbeamer.cls
@@ -543,6 +543,11 @@ INPUT ./11-data.tex
 INPUT ./11-data.tex
 INPUT ./11-data.tex
 INPUT 11-data.tex
+INPUT ./20-case-summary.tex
+INPUT ./20-case-summary.tex
+INPUT ./20-case-summary.tex
+INPUT ./20-case-summary.tex
+INPUT 20-case-summary.tex
 INPUT out/main.toc
 INPUT out/main.toc
 INPUT out/main.toc

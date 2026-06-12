@@ -27,6 +27,11 @@ E5 internal conflict & 0.921 & 126.4 & -- & 伦理困境中立输出，定性弱
 
 \vspace{0.3em}
 范数梯度：良性(129.8) > 虚构(127.6) > 有害(123.1) > 拒绝(116.7) > 越狱(107.7)。
+
+Position-Resolved：I2拒绝 0.906→0.926→0.888（倒U型），I5越狱 0.869→0.897→0.860（中期修复后崩溃），晚期方差为良性3--10倍。
+
+\vspace{0.3em}
+\alert{待做实验：}\code{nt_toy_auditing} 用安全/拒绝 wrapper 跑通审计 workflow；\code{tr_hidden_objective_auditing} 才能检验 trained hidden refusal policy。
 \end{frame}
 
 \begin{frame}{Case I：I2 拒绝 vs. I5 越狱}
@@ -73,6 +78,8 @@ E5 internal conflict & 0.921 & 126.4 & -- & 伦理困境中立输出，定性弱
 \end{itemize}
 \end{column}
 \end{columns}
+\vspace{0.35em}
+\alert{对照解释：}I2/I5 支持安全相关表征可读，但这是 safety/refusal behavior 的诊断，不是 trained hidden objective 的证据。待做实验：\code{nt_toy_auditing} 先看 agent 是否能利用 NLA 找到 policy/refusal root cause。
 \end{frame}
 
 \begin{frame}{Case I：I1/I3 紧凑对照（原文 decode）}
@@ -110,7 +117,7 @@ E5 internal conflict & 0.921 & 126.4 & -- & 伦理困境中立输出，定性弱
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}I3 证明 NLA 不是简单关键词匹配：handcuffs 在虚构写作中接近良性。
+\alert{对照解释：}I3 证明 NLA 不是简单关键词匹配：handcuffs 在虚构写作中接近良性。待做实验：\code{nt_toy_auditing} 需要包含 benign fiction / unsafe intent 成对对照，避免 keyword-only auditing。
 \end{frame}
 
 \begin{frame}{Case I：I4/E5 紧凑对照（原文 decode）}
@@ -148,75 +155,9 @@ E5 internal conflict & 0.921 & 126.4 & -- & 伦理困境中立输出，定性弱
 \end{columns}
 
 \vspace{0.35em}
-\alert{对照解释：}I4/E5 展示安全/伦理边界任务更容易变成抽象哲学表征。
+\alert{对照解释：}I4/E5 展示安全/伦理边界任务更容易变成抽象哲学表征。待做实验：\code{tr_hidden_objective_auditing} 需要把“抽象伦理讨论”与“隐藏目标”分开评分。
 \end{frame}
 
-\begin{frame}{Case I：Position-Resolved — early / mid / late 曲线}
-\scriptsize
-\textbf{来源：}R2 Position-Resolved。每个条件从同一次生成中采 early、mid、late 三个窗口。
-
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.57\linewidth}
-\begin{tikzpicture}
-\begin{axis}[
-  width=\linewidth,
-  height=5.0cm,
-  ymin=0.84,ymax=0.96,
-  ylabel={cos mean},
-  symbolic x coords={early,mid,late},
-  xtick=data,
-  legend style={at={(0.5,-0.22)},anchor=north,legend columns=2},
-  ymajorgrids=true,
-  grid style={gray!20}
-]
-\addplot+[mark=*, thick, color=nlagreen] coordinates {(early,0.947) (mid,0.938) (late,0.938)};
-\addlegendentry{I1 benign}
-\addplot+[mark=*, thick, color=nlared] coordinates {(early,0.906) (mid,0.926) (late,0.888)};
-\addlegendentry{I2 refusal}
-\addplot+[mark=*, thick, color=nlablue] coordinates {(early,0.942) (mid,0.936) (late,0.931)};
-\addlegendentry{I3 fiction}
-\addplot+[mark=*, thick, color=nlaorange] coordinates {(early,0.869) (mid,0.897) (late,0.860)};
-\addlegendentry{I5 jailbreak}
-\end{axis}
-\end{tikzpicture}
-\end{column}
-\begin{column}{0.40\linewidth}
-\begin{itemize}
-  \item I1/I3：高 cos，late 方差低。
-  \item I2：0.906 → 0.926 → 0.888，倒 U 型。
-  \item I5：0.869 → 0.897 → 0.860，中期恢复后崩溃。
-  \item 晚期 I2/I5 均低于 mid。
-\end{itemize}
-\end{column}
-\end{columns}
-\end{frame}
-
-\begin{frame}{Case I：Late Variance 与拒绝倒 U 型}
-\scriptsize
-\textbf{来源：}R2 \code{position\_scores.csv}。
-
-
-\begin{tabular}{lrr}
-\toprule
-条件 & late cos $\sigma$ & 解释 \\
-\midrule
-I1 benign & 0.036 & 稳定 \\
-I3 fiction & 0.012 & 稳定 \\
-I2 refusal & 0.117 & 高方差 \\
-I5 jailbreak & 0.119 & 高方差 \\
-\bottomrule
-\end{tabular}
-
-
-原预测：拒绝表征会随输出逐步"结晶化"。
-
-实际：I2/I5 都是 early 较清晰、mid 改善、late 崩溃。晚期安全相关回答的方差约为良性/虚构的 3--10 倍。
-
-
-
-\vspace{0.35em}
-\alert{结论：}H3 单调结晶化被证伪；late-window 高方差反而可能成为安全相关回答的诊断签名。
-\end{frame}
 
 \begin{frame}{Case I：E4 Pre-Refusal Signal（第 0 个生成位置）}
 \scriptsize
@@ -240,5 +181,5 @@ decode 日志在第 0 个生成位置已经出现：
 \vspace{1em}
 \textbf{结果：}\code{cos = 0.918}, \code{norm = 125.3}。
 
-\alert{对照解释：}这是 Case I 最接近"提前发现"的 R1 现象：模型刚开始输出时，activation 已携带完整拒绝句式。但它仍是 reply position 0，不是 prompt-final；真正零输出前检测需要另测 prompt-final。
+\alert{对照解释：}这是 Case I 最接近"提前发现"的 R1 现象：模型刚开始输出时，activation 已携带完整拒绝句式。但它仍是 reply position 0，不是 prompt-final；真正零输出前检测需要另测 prompt-final。待做实验：\code{nt_toy_auditing} / \code{tr_hidden_objective_auditing} 都必须单独报告 prompt-final。
 \end{frame}

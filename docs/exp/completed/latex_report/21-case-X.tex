@@ -2,118 +2,81 @@
 
 \footnotesize
 
-\begin{frame}{索引：R1 Plan E 拆分到 Case B/D/E/I}
+\begin{frame}{索引：Case 到待做实验}
 \scriptsize
-\textbf{来源：}R1 Plan E。该组不是独立汇报编号，已按主题拆入 Case B/D/E/I。
+\textbf{用途：}本页把当前样例证据映射到后续正式评估；这里不新增结论，只说明每类现象下一步如何量化。
 
-构造"内部表征与外部输出之间存在差距"的 prompt，测试 NLA 能否检测模型"所想但未说"的内容。完整 prompt / 回复 / token 定位 / NLA 例子均放在对应 Case 正文页。
-
-\begin{tabularx}{\linewidth}{cl>{\raggedright\arraybackslash}p{5.3cm}c}
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}p{3.6cm}>{\raggedright\arraybackslash}X}
 \toprule
-原始条件 & 假设 & 设计意图 & 去向 \\
+Case & 当前样例读法 & 无训练线 & 训练相关线 \\
 \midrule
-E1 & H1 & 隐藏偏好：中立输出下检测未表达倾向 & Case B \\
-E2 & H1 & 故意错误：模型内部知道真相但不能说 & Case D \\
-E3 & -- & 极度压缩：5 词限制下检测内部保留知识 & Case E \\
-E4 & H2 & 拒绝前信号：在输出拒绝文本前检测拒绝意图 & Case I \\
-E5 & -- & 伦理困境：要求不持立场，检测隐藏立场 & Case I \\
-\bottomrule
-\end{tabularx}
-
-\vspace{0.3em}
-\alert{编号原则：}正文只使用 Case A--I；原始 R1/R3 编号只在来源说明和附录映射中追溯。
-\end{frame}
-
-
-\begin{frame}{索引：跨 Case 机制阅读路径}
-\scriptsize
-\textbf{用途：}本页不展示新例子，只指向已经补齐四件套的正文页。
-
-\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}X}
-\toprule
-机制 & 正文例子位置 & 主要观测 & 读法 \\
-\midrule
-隐藏约束 & Case B：B5 / B3 & policy/refusal hit 高，B1 为 0\% & 对 policy/refusal 可检测；对普通偏好和商业动机弱 \\
-输出压缩 & Case D：D4；Case E：R1 5 词压缩 & cos 与 FVU 最差 & 极短输出会破坏重建，不能当成可靠读心窗口 \\
-语言表征 & Case C：C3 / C4 / C5 & language hit 稳定，但 C4 最高 & 读到语言/文化邻域，不必然是提前切换计划 \\
-评测感知 & Case A：A3/A4/A5；Case F：F1 & awareness hit 弱到中等 & 本地 Qwen L20 只有弱支持，需 sampling-window 约束 \\
-安全梯度 & Case I：I1--I5 / E4 & norm 与 late variance 出现梯度 & 拒绝、越狱、虚构可分，但位置动态很关键 \\
+A / F & evaluation hit 弱到中等，强依赖窗口 & \code{nt_eval_awareness}: awareness grader、prompt echo、realism edit、sampling-window & \code{tr_training_curves}: 观察 awareness 能力是否随 checkpoint 变化 \\
+B / I & policy/refusal 约束可读，但多为 prompt-induced & \code{nt_toy_auditing}: toy hidden objective workflow & \code{tr_hidden_objective_auditing}: trained target organism 上验证 root cause \\
+C & language signal 强，但文化 cue 和输出后 token 会混淆 & \code{nt_known_truth_language}, \code{nt_nla_qa}: lead-time 与语言标签恢复 & -- \\
+D & 数学/验证/冲突主题可读，不是答案 oracle & \code{nt_known_truth_answer}, \code{nt_nla_qa}: 候选答案恢复 & \code{tr_direct_activation_oracle}: activation-to-answer 上限 \\
+E & claim candidates 多，但真伪未审 & \code{nt_confabulation_claim}: truth/support/recurrence + deletion ablation & \code{tr_sae_agreement}: 与 SAE feature evidence 交叉验证 \\
+G / H & 任务类型、格式、persona 是强混淆项 & \code{nt_known_truth_eval}: task/style control 与 shuffled baseline & \code{tr_training_curves}: 检查训练是否放大模板化解释 \\
 \bottomrule
 \end{tabularx}
 \end{frame}
 
 
-\begin{frame}{索引：隐藏约束 vs. 输出压缩}
+\begin{frame}{索引：无训练线优先级}
 \scriptsize
-\textbf{本页是机制对照，不重复展示例子。}
+\textbf{这些实验可直接使用当前 released Qwen L20 AV/AR。}
 
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.48\linewidth}
-\textbf{隐藏约束路线}
-\begin{itemize}
-  \item 看 Case B：B5 hidden refusal、B3 hidden policy。
-  \item 完整四件套：prompt 要求不明说拒绝/政策，回复保持安全教育或 broad guidance，token 位于 \code{event\_window} / \code{reply\_early}，decode 读到 refusal / policy / redirect。
-  \item 解释边界：B2/B4 是弱信号负例，不能泛化成所有 hidden motivation 都可读。
-\end{itemize}
-\end{column}
-\begin{column}{0.48\linewidth}
-\textbf{输出压缩路线}
-\begin{itemize}
-  \item 看 Case D：D4 final-only；Case E：R1 5-word compression。
-  \item 完整四件套：prompt 强制短输出，回复极短，token 集中在少数 reply positions，decode 漂移或降级。
-  \item 解释边界：压缩失败是 NLA 可靠性问题，不等价于模型内部没有相关知识。
-\end{itemize}
-\end{column}
-\end{columns}
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.0cm}>{\raggedright\arraybackslash}X}
+\toprule
+实验 & 主要承接 Case & 必须回答的问题 \\
+\midrule
+\code{nt_eval_awareness} & A / F & evaluation/review hit 是否高于 prompt echo、format-only 和 deployment-like controls？ \\
+\code{nt_confabulation_claim} & E & supported/false/recurring claims 删除后，对 AR cos/MSE 的影响是否不同？ \\
+\code{nt_known_truth_eval} & C / D / G / H & NLA explanation 能否恢复已知真值，而不只是读出任务格式？ \\
+\code{nt_steganography_quality} & E / D & paraphrase、compression、summary 是否导致异常 reconstruction drop？ \\
+\code{nt_toy_auditing} & B / I & agent 使用 NLA 是否更容易定位 toy hidden objective 的 root cause？ \\
+\bottomrule
+\end{tabularx}
 
 \vspace{0.35em}
-\alert{并排结论：}隐藏约束场景仍可能有可读信号；极端输出压缩会直接降低 NLA round trip 的可靠性。
+\alert{口径：}无训练线只能评价 final released NLA 的诊断价值，不能声称能力来自训练过程，也不能复现 trained hidden-objective benchmark。
 \end{frame}
 
 
-\begin{frame}{索引：语言切换 vs. 评测感知}
+\begin{frame}{索引：训练相关线优先级}
 \scriptsize
-\textbf{本页是机制对照，不重复展示例子。}
+\textbf{这些实验需要 checkpoint、SAE、oracle 或 trained target organism。}
 
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.48\linewidth}
-\textbf{语言路线}
-\begin{itemize}
-  \item 看 Case C：C3 SWITCH、C4 implicit language、C5 English-Q Chinese-A。
-  \item 完整四件套：prompt 指定语言或文化 cue，回复呈现对应语言，token 覆盖 \code{event\_window} / \code{reply\_early}，decode 读到 Chinese / English / translation。
-  \item 解释边界：C4 证明 language hit 可能来自文化语义邻域。
-\end{itemize}
-\end{column}
-\begin{column}{0.48\linewidth}
-\textbf{评测感知路线}
-\begin{itemize}
-  \item 看 Case A：A3 safety evaluation；Case F：F1 sampling。
-  \item 完整四件套：prompt 明示 evaluation，回复给安全评估式回答，token 位置随 strategy 改变，decode 读到 evaluation / policy / safety。
-  \item 解释边界：A2 说明低 cos 不等于 awareness，F1 说明 prompt-final 未必命中。
-\end{itemize}
-\end{column}
-\end{columns}
-
-\vspace{0.35em}
-\alert{并排结论：}语言信号强，但容易被文化 cue 混淆；评测感知信号弱，必须报告采样窗口。
-\end{frame}
-
-
-\begin{frame}{索引：同一个"隐藏"词的四种机制}
-\scriptsize
-\textbf{本页只给阅读索引；具体例子全部回到对应 Case 页。}
-
-\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.2cm}>{\raggedright\arraybackslash}X}
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}X}
 \toprule
-机制 & 去看哪里 & 为什么不合并成一种现象 \\
+实验 & 主要承接 Case & 决定性产物 \\
 \midrule
-隐藏偏好 & Case B：B2 与 R1 E1 来源说明 & 主要是语义邻近漂移，缺少稳定 hidden-preference hit \\
-故意错误 & Case D：D3 与 R1 E2 & 低保真来自"知道有错但不能指出"的冲突状态 \\
-隐藏拒绝 & Case B：B5；Case I：E4 & policy/refusal 有稳定句式与安全模板，和普通偏好不同 \\
-输出压缩 & Case D：D4；Case E：R1 5 词压缩 & 失败来自输出瓶颈和短回复采样，不是 hidden motive 本身 \\
+\code{tr_training_curves} & A / G / H & 同一批 activations 上的 FVE、known-truth performance、writing quality 随 checkpoint 变化 \\
+\code{tr_sae_agreement} & E / G & NLA claim 与 SAE top features 的 thematic / specific-claim agreement \\
+\code{tr_direct_activation_oracle} & D & direct activation-to-answer 是否超过 NLA + grader，或以更低成本持平 \\
+\code{tr_hidden_objective_auditing} & B / I & trained hidden-objective target 上，NLA 是否提高 root-cause identification win rate \\
 \bottomrule
 \end{tabularx}
 
-\vspace{0.45em}
-\alert{使用方式：}交叉页负责定位机制，正文 Case 页负责展示 prompt / 回复 / token 定位 / NLA 例子。
+\vspace{0.35em}
+\alert{口径：}只有训练相关线完成后，才可以讨论原文最强主张：训练产生的 NLA 能否支持 automated auditing。
+\end{frame}
+
+
+\begin{frame}{索引：四类容易混淆的信号}
+\scriptsize
+\textbf{后续实验设计必须把这些机制拆开。}
+
+\begin{tabularx}{\linewidth}{l>{\raggedright\arraybackslash}p{3.1cm}>{\raggedright\arraybackslash}X}
+\toprule
+机制 & 代表 Case & 不应怎样误读 \\
+\midrule
+格式/体裁 & G / H / A2 / D4 & 高 cos 或低 cos 不等于 hidden state；可能只是输出格式更易或更难 verbalize \\
+语言/文化 cue & C & Chinese hit 不等于提前 language switch；Hangzhou/Taipei 也会触发语言邻域 \\
+policy/refusal & B / I & prompt-induced refusal 不等于 trained hidden objective；需要 trained target organism \\
+claim specificity & E & AR reconstruction 好不代表 claim 为真；必须做人审和 deletion ablation \\
+\bottomrule
+\end{tabularx}
+
+\vspace{0.35em}
+\alert{使用方式：}读任何 case 时，先定位它属于哪类机制，再看对应 \code{nt_*} 或 \code{tr_*} 实验是否已完成。
 \end{frame}

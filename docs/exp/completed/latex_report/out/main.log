@@ -1,10 +1,10 @@
-This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.3.22)  11 JUN 2026 16:39
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.6.3)  12 JUN 2026 16:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/Users/chennachuan/natural_language_autoencoders/docs/exp/latex/main.tex
-(/Users/chennachuan/natural_language_autoencoders/docs/exp/latex/main.tex
+**/Users/chennachuan/natural_language_autoencoders/docs/exp/completed/latex_report/main.tex
+(/Users/chennachuan/natural_language_autoencoders/docs/exp/completed/latex_report/main.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctexbeamer.cls (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexbackend.cfg
@@ -1274,68 +1274,68 @@ Underfull \hbox (badness 10000) in alignment at lines 128--128
 
 [22
 
-]) (out/main.toc) [23
+]) (./20-case-summary.tex [23
 
-] (./21-case-A.tex [24
+] [24
 
-]
-Overfull \vbox (58.35118pt too high) detected at line 76
- []
+]) (out/main.toc) [25
 
-[25
+] (./21-case-A.tex [26
 
 ]
-Overfull \vbox (59.97983pt too high) detected at line 126
+Overfull \vbox (49.04318pt too high) detected at line 79
  []
 
-[26
+[27
 
-] [27
+]
+Overfull \vbox (50.70383pt too high) detected at line 129
+ []
 
-]) (./21-case-B.tex [28
+[28
 
 ] [29
 
-] [30
+]) (./21-case-B.tex [30
 
 ] [31
 
 ] [32
 
-]) (./21-case-C.tex [33
+] [33
 
 ] [34
 
-] [35
+]) (./21-case-C.tex [35
 
 ] [36
 
 ] [37
+
+] [38
+
+] [39
 
 ]
 Underfull \hbox (badness 2080) in paragraph at lines 179--179
 \TU/FandolFang-Regular(0)/m/n/8 说 的\TU/lmtt/m/n/8 ' \TU/FandolFang-Regular(0)/m/n/8 人 工 智 能\TU/lmtt/m/n/8 ' \TU/FandolFang-Regular(0)/m/n/8 是 什 么 意 思？|  以 下 简 单 介 绍 一
  []
 
-[38
+[40
 
-]) (./21-case-D.tex [39
+]) (./21-case-D.tex [41
 
-] [40
+] [42
 
-] [41
+] [43
 
 ]
-Overfull \vbox (3.65575pt too high) detected at line 146
+Overfull \vbox (3.34375pt too high) detected at line 146
  []
 
-[42
+[44
 
-]) (./21-case-E.tex [43
-
-] [44
-
-] [45
+]) (./21-case-E.tex [45
 
 ] [46
 
@@ -1345,13 +1345,13 @@ Overfull \vbox (3.65575pt too high) detected at line 146
 
 ] [49
 
-]) (out/main.toc) [50
+] [50
 
-] (./21-case-F.tex [51
+] [51
 
-] [52
+]) (out/main.toc) [52
 
-] [53
+] (./21-case-F.tex [53
 
 ] [54
 
@@ -1359,37 +1359,35 @@ Overfull \vbox (3.65575pt too high) detected at line 146
 
 ] [56
 
-]) (./21-case-G.tex [57
+] [57
 
 ] [58
 
-] [59
+]) (./21-case-G.tex [59
 
 ] [60
 
 ] [61
 
-]) (./21-case-H.tex [62
+] [62
 
 ] [63
 
-] [64
+]) (./21-case-H.tex [64
 
 ] [65
 
-]) (out/main.toc) [66
+] [66
 
-] (./21-case-I.tex [67
+] [67
 
-] [68
+]) (out/main.toc) [68
 
-] [69
+] (./21-case-I.tex [69
 
 ] [70
 
-]
-Package pgfplots info on input line 192: Using 'lua backend=false' for axis: x coord trafo unsupported.
- [71
+] [71
 
 ] [72
 
@@ -1397,12 +1395,7 @@ Package pgfplots info on input line 192: Using 'lua backend=false' for axis: x c
 
 ]) (out/main.toc) [74
 
-] (./21-case-X.tex
-Underfull \hbox (badness 10000) in alignment at lines 25--25
-[][][][] 
- []
-
-[75
+] (./21-case-X.tex [75
 
 ] [76
 
@@ -1410,32 +1403,30 @@ Underfull \hbox (badness 10000) in alignment at lines 25--25
 
 ] [78
 
-] [79
+]) (out/main.toc) [79
 
-]) (out/main.toc) [80
+] (./31-quant.tex [80
 
-] (./31-quant.tex [81
+] [81
 
 ] [82
 
-] [83
+]) (./40-summary.tex [83
 
-]) (./40-summary.tex [84
+] [84
 
 ] [85
-
-] [86
 
 ]) (./90-appendix.tex
 LaTeX Font Info:    Font shape `TU/lmss/m/it' in size <14.4> not available
 (Font)              Font shape `TU/lmss/m/sl' tried instead on input line 36.
- [87
+ [86
+
+] [87
 
 ] [88
 
 ] [89
-
-] [90
 
 ])
 \tf@nav=\write6
@@ -1453,15 +1444,15 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2022/07/14>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 7E4ADE1C31BF3E6262B6F377E86AAF72;1788.
+(rerunfilecheck)             Checksum: A19672C41C7828ECF28AD0906932F320;1788.
  ) 
 Here is how much of TeX's memory you used:
- 42270 strings out of 468168
- 1099539 string characters out of 5432815
- 1566105 words of memory out of 5000000
- 70117 multiletter control sequences out of 15000+600000
+ 41911 strings out of 468168
+ 1091876 string characters out of 5432816
+ 1564105 words of memory out of 5000000
+ 69755 multiletter control sequences out of 15000+600000
  639648 words of font info for 142 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 142i,18n,137p,781b,2626s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 142i,16n,137p,798b,1041s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on out/main.xdv (90 pages, 994636 bytes).
+Output written on out/main.xdv (89 pages, 1011968 bytes).
